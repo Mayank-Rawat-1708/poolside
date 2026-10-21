@@ -7,7 +7,10 @@ function num(name: string, fallback: number): number {
   return value;
 }
 
+const txStrategy = process.env.TX_STRATEGY ?? 'hold';
+
 export const config = {
+  txStrategy,
   port: num('PORT', 3000),
   logLevel: process.env.LOG_LEVEL ?? 'info',
   db: {

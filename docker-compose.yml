@@ -45,6 +45,7 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-poolside}
       PGDATABASE: ${POSTGRES_DB:-poolside}
       DB_POOL_MAX: ${DB_POOL_MAX:-10}
+      TX_STRATEGY: ${TX_STRATEGY:-hold}
       DOWNSTREAM_URL: http://downstream:4001
       ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
       OTEL_SERVICE_NAME: poolside-api

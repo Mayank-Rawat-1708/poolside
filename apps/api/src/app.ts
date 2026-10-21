@@ -6,6 +6,7 @@ import { InstrumentedPool } from './db/instrumented-pool.js';
 import { PaymentsClient } from './downstream/payments-client.js';
 import { healthRoutes } from './health/routes.js';
 import { orderRoutes } from './orders/routes.js';
+import { isStrategyName, StrategySwitch } from './orders/strategies/index.js';
 import { loggingOptions, registerHttpHooks } from './obs/http-hooks.js';
 import { registry } from './obs/metrics.js';
 
@@ -20,6 +21,8 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
   const db = new InstrumentedPool(pool);
   registerHttpHooks(app, { poolStats: () => db.stats() });
   const payments = new PaymentsClient(config.downstreamUrl);
+  if (!isStrategyName(config.txStrategy)) throw new Error(`unknown TX_STRATEGY "${config.txStrategy}"`);
+  const strategy = new StrategySwitch(config.txStrategy);
 
   app.setErrorHandler((err: FastifyError, req, reply) => {
     if (err.validation) {
@@ -37,7 +40,7 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
   });
 
   app.register(healthRoutes, { db, opsPool });
-  app.register(orderRoutes, { db, payments });
-  app.register(adminRoutes, { adminToken: config.adminToken, opsPool });
+  app.register(orderRoutes, { db, payments, strategy });
+  app.register(adminRoutes, { adminToken: config.adminToken, opsPool, strategy });
   return app;
 }

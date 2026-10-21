@@ -1,16 +1,18 @@
 import type { FastifyInstance } from 'fastify';
-import { timedQuery, type InstrumentedPool } from '../db/instrumented-pool.js';
+import type { InstrumentedPool } from '../db/instrumented-pool.js';
 import type { PaymentsClient } from '../downstream/payments-client.js';
-import { findOrder, insertPendingOrder, markOrder } from './repo.js';
+import { findOrder } from './repo.js';
+import type { StrategySwitch } from './strategies/index.js';
 
 interface Deps {
   db: InstrumentedPool;
   payments: PaymentsClient;
+  strategy: StrategySwitch;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function orderRoutes(app: FastifyInstance, { db, payments }: Deps) {
+export async function orderRoutes(app: FastifyInstance, { db, payments, strategy }: Deps) {
   app.post<{ Body: { customerId: string; amountCents: number } }>(
     '/orders',
     {
@@ -27,23 +29,8 @@ export async function orderRoutes(app: FastifyInstance, { db, payments }: Deps) 
       },
     },
     async (req, reply) => {
-      const { customerId, amountCents } = req.body;
-
-      // The order and its payment are written atomically.
-      const client = await db.acquire();
-      try {
-        await timedQuery(client, 'begin', 'BEGIN');
-        const pending = await insertPendingOrder(client, customerId, amountCents);
-        const { paymentRef } = await payments.charge(pending.id, amountCents);
-        const order = await markOrder(client, pending.id, 'paid', paymentRef);
-        await timedQuery(client, 'commit', 'COMMIT');
-        return reply.code(201).send(order);
-      } catch (err) {
-        await timedQuery(client, 'rollback', 'ROLLBACK').catch(() => {});
-        throw err;
-      } finally {
-        client.release();
-      }
+      const order = await strategy.createOrder({ db, payments }, req.body);
+      return reply.code(201).send(order);
     },
   );
 

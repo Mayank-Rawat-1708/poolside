@@ -1,10 +1,12 @@
 import { timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import type pg from 'pg';
+import { isStrategyName, STRATEGIES, type StrategySwitch } from '../orders/strategies/index.js';
 
 interface Deps {
   adminToken: string;
   opsPool: pg.Pool;
+  strategy: StrategySwitch;
 }
 
 function tokenMatches(header: string | undefined, token: string): boolean {
@@ -27,11 +29,24 @@ const SESSIONS_SQL = `
   GROUP BY 1
   ORDER BY 2 DESC`;
 
-export async function adminRoutes(app: FastifyInstance, { adminToken, opsPool }: Deps) {
+export async function adminRoutes(app: FastifyInstance, { adminToken, opsPool, strategy }: Deps) {
   app.addHook('onRequest', async (req, reply) => {
     if (!tokenMatches(req.headers.authorization, adminToken)) {
       return reply.code(401).send({ error: 'unauthorized' });
     }
+  });
+
+  app.get('/admin/strategy', async () => ({ strategy: strategy.name, available: Object.keys(STRATEGIES) }));
+
+  app.put<{ Body: { strategy: string } }>('/admin/strategy', async (req, reply) => {
+    const next = req.body?.strategy;
+    if (!isStrategyName(next)) {
+      return reply.code(400).send({ error: 'bad_request', available: Object.keys(STRATEGIES) });
+    }
+    const previous = strategy.name;
+    strategy.set(next);
+    req.log.warn({ previous, strategy: next }, 'tx strategy changed');
+    return { strategy: next, previous };
   });
 
   app.get('/admin/db-sessions', async () => {
