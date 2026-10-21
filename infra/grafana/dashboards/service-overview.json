@@ -39,7 +39,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 1
       },
@@ -93,8 +93,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 1
       },
       "targets": [
@@ -139,6 +139,60 @@
     {
       "type": "timeseries",
       "id": 4,
+      "title": "Errors by class / s",
+      "description": "Failed requests by error class. A new failure mode shows up as a new series (PoolAcquireTimeoutError, DownstreamError, ...).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "sum by (class) (rate(app_errors_total[15s]))",
+          "legendFormat": "{{class}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "mode": "none"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 5,
       "title": "Latency p50 / p95 / p99 (all routes)",
       "description": "Server-side latency. Client timeouts (k6 status 0) are not visible here.",
       "datasource": {
@@ -147,8 +201,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 18,
         "y": 1
       },
       "targets": [
@@ -212,7 +266,7 @@
     },
     {
       "type": "row",
-      "id": 5,
+      "id": 6,
       "title": "2 \u00b7 Saturation: where requests wait",
       "collapsed": false,
       "gridPos": {
@@ -225,7 +279,7 @@
     },
     {
       "type": "timeseries",
-      "id": 6,
+      "id": 7,
       "title": "Pool connections in use vs max",
       "description": "Checked-out connections. Pinned at max = every connection busy.",
       "datasource": {
@@ -327,7 +381,7 @@
     },
     {
       "type": "timeseries",
-      "id": 7,
+      "id": 8,
       "title": "Pool waiting (queued callers)",
       "description": "Callers blocked in pool.connect(). Anything above 0 for long means demand > pool capacity.",
       "datasource": {
@@ -381,7 +435,7 @@
     },
     {
       "type": "timeseries",
-      "id": 8,
+      "id": 9,
       "title": "Pool acquire wait p99",
       "description": "Time spent waiting for a connection before any SQL runs.",
       "datasource": {
@@ -445,7 +499,7 @@
     },
     {
       "type": "timeseries",
-      "id": 9,
+      "id": 10,
       "title": "Connection hold time p99",
       "description": "Acquire -> release. Compare with query p99: a big gap means the connection is held while doing something other than SQL.",
       "datasource": {
@@ -509,7 +563,7 @@
     },
     {
       "type": "timeseries",
-      "id": 10,
+      "id": 11,
       "title": "Postgres sessions by state",
       "description": "From pg_stat_activity via postgres_exporter. Many 'idle in transaction' = transactions open but not running SQL.",
       "datasource": {
@@ -609,7 +663,7 @@
     },
     {
       "type": "row",
-      "id": 11,
+      "id": 12,
       "title": "3 \u00b7 Dependencies: is the work itself slow?",
       "collapsed": false,
       "gridPos": {
@@ -622,7 +676,7 @@
     },
     {
       "type": "timeseries",
-      "id": 12,
+      "id": 13,
       "title": "DB query p99 by query",
       "description": "SQL execution time only (pool wait excluded).",
       "datasource": {
@@ -676,7 +730,7 @@
     },
     {
       "type": "timeseries",
-      "id": 13,
+      "id": 14,
       "title": "Downstream (payments) latency",
       "description": "Per attempt. If API latency is far above this, requests are waiting somewhere else.",
       "datasource": {
@@ -740,7 +794,7 @@
     },
     {
       "type": "timeseries",
-      "id": 14,
+      "id": 15,
       "title": "Downstream outcomes & retries / s",
       "description": "Errors and retry storms show up here.",
       "datasource": {
@@ -880,7 +934,7 @@
     },
     {
       "type": "row",
-      "id": 15,
+      "id": 16,
       "title": "4 \u00b7 Process resources: usually ruled out",
       "collapsed": false,
       "gridPos": {
@@ -893,7 +947,7 @@
     },
     {
       "type": "timeseries",
-      "id": 16,
+      "id": 17,
       "title": "Event loop lag p99",
       "description": "High = CPU-bound or blocking code in the API process.",
       "datasource": {
@@ -947,7 +1001,7 @@
     },
     {
       "type": "timeseries",
-      "id": 17,
+      "id": 18,
       "title": "Heap used",
       "description": "Steady climb across GCs = leak.",
       "datasource": {
@@ -1011,7 +1065,7 @@
     },
     {
       "type": "timeseries",
-      "id": 18,
+      "id": 19,
       "title": "CPU (API process)",
       "description": "",
       "datasource": {
@@ -1068,6 +1122,20 @@
     "list": []
   },
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "name": "TX strategy change",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "iconColor": "purple",
+        "expr": "changes(app_tx_strategy{strategy=\"release\"}[10s]) > 0",
+        "step": "5s",
+        "titleFormat": "TX_STRATEGY changed",
+        "textFormat": "release active = {{__value__}}"
+      }
+    ]
   }
 }
