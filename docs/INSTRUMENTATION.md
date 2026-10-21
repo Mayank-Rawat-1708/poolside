@@ -66,15 +66,15 @@ Auto-instrumentation: incoming HTTP (span named after the route template), outgo
 | `db.connection.held` | Acquire → release. In `hold` mode it visibly contains the `downstream.charge` span. That is the bug, drawn as a waterfall. |
 | `downstream.charge` | The provider call; retries appear as span events with attempt, delay and reason. |
 
-`hold` mode under load, from a real trace (`docs/evidence`):
+`hold` mode under load (`docs/evidence/traces/hold-waterfall.txt`):
 
 ```
-POST /orders                 2814 ms
-├─ db.pool.acquire           1095 ms   ← waiting for a connection
+POST /orders                 2778 ms
+├─ db.pool.acquire            995 ms   ← waiting for a connection
 ├─ pg BEGIN / INSERT            2 ms
-├─ db.connection.held        1718 ms   ← held while…
-│  └─ downstream.charge      1711 ms   ← …the payments call runs
-└─ pg UPDATE / COMMIT           4 ms
+├─ db.connection.held        1781 ms   ← held while…
+│  └─ downstream.charge      1776 ms   ← …the payments call runs
+└─ pg UPDATE / COMMIT           3 ms
 ```
 
 ## Health checks
