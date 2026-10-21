@@ -30,7 +30,11 @@ function sampleDelay(): number {
   return Math.max(0, behaviour.latencyMs + jitter);
 }
 
-const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+const app = Fastify({
+  logger: { level: process.env.LOG_LEVEL ?? 'info', base: { service: 'downstream' } },
+  requestIdHeader: 'x-request-id',
+  requestIdLogLabel: 'requestId',
+});
 
 app.post<{ Body: { orderId: string; amountCents: number } }>(
   '/charge',
