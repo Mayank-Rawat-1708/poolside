@@ -57,6 +57,15 @@ services:
       DOWNSTREAM_JITTER_MS: ${DOWNSTREAM_JITTER_MS:-20}
     ports: ["4001:4001"]
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=1d
+    volumes:
+      - ./infra/prometheus:/etc/prometheus:ro
+    ports: ["9090:9090"]
+
   # One-shot load generator: `docker compose run --rm k6 run /load/spike.js`
   k6:
     image: grafana/k6:2.3.0

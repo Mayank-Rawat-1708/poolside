@@ -4,7 +4,8 @@ import type { Config } from './config.js';
 import { PaymentsClient } from './downstream/payments-client.js';
 import { healthRoutes } from './health/routes.js';
 import { orderRoutes } from './orders/routes.js';
-import { loggingOptions, registerRequestLogging } from './obs/logging.js';
+import { loggingOptions, registerHttpHooks } from './obs/http-hooks.js';
+import { registry } from './obs/metrics.js';
 
 export interface AppDeps {
   config: Config;
@@ -13,7 +14,7 @@ export interface AppDeps {
 
 export function buildApp({ config, pool }: AppDeps) {
   const app = Fastify(loggingOptions(config.logLevel));
-  registerRequestLogging(app);
+  registerHttpHooks(app);
   const payments = new PaymentsClient(config.downstreamUrl);
 
   app.setErrorHandler((err: FastifyError, req, reply) => {
@@ -24,6 +25,11 @@ export function buildApp({ config, pool }: AppDeps) {
     req.log.error({ err }, 'request failed');
     // Never leak internals to clients.
     return reply.code(500).send({ error: 'internal_error' });
+  });
+
+  app.get('/metrics', async (_req, reply) => {
+    reply.type(registry.contentType);
+    return registry.metrics();
   });
 
   app.register(healthRoutes, { pool });

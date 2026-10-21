@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { FastifyInstance, FastifyServerOptions } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import { stdTimeFunctions } from 'pino';
+import { httpRequestDuration } from './metrics.js';
 import { runWithContext } from './request-context.js';
 
 // Accept a caller's request id only if it looks like one; otherwise mint our own.
@@ -33,7 +34,7 @@ declare module 'fastify' {
   }
 }
 
-export function registerRequestLogging(app: FastifyInstance) {
+export function registerHttpHooks(app: FastifyInstance) {
   // Callback-style hook: everything after done() runs inside the context.
   app.addHook('onRequest', (req, reply, done) => {
     reply.header('x-request-id', req.id);
@@ -41,9 +42,17 @@ export function registerRequestLogging(app: FastifyInstance) {
   });
 
   app.addHook('onResponse', (req, reply, done) => {
+    // Use the route template, not the raw URL, to keep label cardinality bounded.
+    const route = req.routeOptions.url ?? 'unmatched';
+    if (route !== '/metrics') {
+      httpRequestDuration
+        .labels(req.method, route, String(reply.statusCode))
+        .observe(reply.elapsedTime / 1000);
+    }
+
     const fields = {
       method: req.method,
-      route: req.routeOptions.url ?? 'unmatched',
+      route,
       status: reply.statusCode,
       durationMs: Math.round(reply.elapsedTime * 10) / 10,
       errorClass: req.errorClass,
