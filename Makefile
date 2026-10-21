@@ -15,7 +15,7 @@ AUTH        := -H "authorization: Bearer $(ADMIN_TOKEN)" -H "content-type: appli
 BREAK_LATENCY_MS ?= 1500
 BREAK_JITTER_MS  ?= 500
 
-.PHONY: help up down logs ps break reset psql check load-baseline load-spike load-slow
+.PHONY: help up down logs ps break reset psql check pg-activity load-baseline load-spike load-slow
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -46,6 +46,9 @@ break: ## Make the payments provider slow (1.5s ± 0.5s)
 reset: ## Restore normal downstream behaviour
 	@curl -sf -XPUT $(DOWNSTREAM)/admin/latency $(AUTH) \
 	  -d '{"latencyMs":50,"jitterMs":20,"errorRate":0}' && echo
+
+pg-activity: ## Snapshot pg_stat_activity grouped by state
+	@scripts/pg-activity.sh
 
 psql: ## Open psql against the compose database
 	docker compose exec postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)

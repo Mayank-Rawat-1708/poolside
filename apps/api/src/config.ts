@@ -19,6 +19,7 @@ export const config = {
     poolMax: num('DB_POOL_MAX', 10),
   },
   downstreamUrl: process.env.DOWNSTREAM_URL ?? 'http://localhost:4001',
+  adminToken: process.env.ADMIN_TOKEN ?? '',
 };
 
 export type Config = typeof config;

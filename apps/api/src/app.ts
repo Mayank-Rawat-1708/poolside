@@ -1,6 +1,7 @@
 import Fastify, { type FastifyError } from 'fastify';
 import type pg from 'pg';
 import type { Config } from './config.js';
+import { adminRoutes } from './admin/routes.js';
 import { InstrumentedPool } from './db/instrumented-pool.js';
 import { PaymentsClient } from './downstream/payments-client.js';
 import { healthRoutes } from './health/routes.js';
@@ -11,9 +12,10 @@ import { registry } from './obs/metrics.js';
 export interface AppDeps {
   config: Config;
   pool: pg.Pool;
+  opsPool: pg.Pool;
 }
 
-export function buildApp({ config, pool }: AppDeps) {
+export function buildApp({ config, pool, opsPool }: AppDeps) {
   const app = Fastify(loggingOptions(config.logLevel));
   const db = new InstrumentedPool(pool);
   registerHttpHooks(app, { poolStats: () => db.stats() });
@@ -36,5 +38,6 @@ export function buildApp({ config, pool }: AppDeps) {
 
   app.register(healthRoutes, { db });
   app.register(orderRoutes, { db, payments });
+  app.register(adminRoutes, { adminToken: config.adminToken, opsPool });
   return app;
 }

@@ -46,6 +46,7 @@ services:
       PGDATABASE: ${POSTGRES_DB:-poolside}
       DB_POOL_MAX: ${DB_POOL_MAX:-10}
       DOWNSTREAM_URL: http://downstream:4001
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
       OTEL_SERVICE_NAME: poolside-api
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports: ["3000:3000"]

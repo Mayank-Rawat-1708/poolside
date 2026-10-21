@@ -11,5 +11,6 @@ export function createPool(db: Config['db']): pg.Pool {
     max: db.poolMax,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
+    application_name: 'poolside-api',
   });
 }
