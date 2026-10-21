@@ -55,6 +55,8 @@ make fix && make load-spike       # TX_STRATEGY=release at runtime: 0% errors
 `make reset` returns to the start (provider 50 ms, `TX_STRATEGY=hold`). Details and expected
 output: [docs/REPRODUCE.md](docs/REPRODUCE.md).
 
+No video: the failure reproduces locally in 3 commands — see [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md); captured evidence is in [docs/evidence/](docs/evidence/README.md).
+
 ## Results (real runs: [docs/evidence](docs/evidence/README.md))
 
 | Spike: 10 → 40 rps, provider 1.5 s ± 0.5 s | `hold` (original) | `release` (fix) |
@@ -81,7 +83,7 @@ route fails".
 | [INSTRUMENTATION.md](docs/INSTRUMENTATION.md) | Every metric, log field, span and health check, and how each surfaces other failures |
 | [PREVENTION.md](docs/PREVENTION.md) | Alert rules (PromQL), the no-I/O-in-transactions rule and guard, load testing in CI, Little's law |
 | [RUNBOOK.md](docs/RUNBOOK.md) | On-call triage for "latency high / 5xx spike" |
-| [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | 3–5 minute recording plan |
+| [WALKTHROUGH.md](docs/WALKTHROUGH.md) | See the failure and the fix yourself in ~5 minutes: what to run and which panels to read |
 | [evidence/](docs/evidence/README.md) | k6 outputs, pg_stat_activity snapshots, traces, screenshots, before/after table |
 
 ## Repository layout
@@ -151,6 +153,19 @@ Non-obvious choices, in the order they were made:
 
 ## Known limitations and failure cases
 
+- **`release` still queues briefly under load.** The INSERT and UPDATE each hold a
+  connection for a few milliseconds, so at high request rates `db_pool_waiting` can blip
+  above 0 for a moment (6 callers on a CI runner, `docs/evidence/ci/`). The meaningful signal is
+  acquire-wait *time*: milliseconds in `release`, provider latency in `hold`. The
+  integration test asserts on that, not on the waiting count.
+- **Cold, slow hosts can hit the acquire timeout while the pool is still opening
+  connections.** In CI, 1 of 903 requests in the load test did (`docs/evidence/ci/github-actions-excerpts.md`). These return a typed 503
+  `POOL_ACQUIRE_TIMEOUT` (both of pg's timeout messages are classified). A possible next
+  step, deliberately not implemented: pre-warm the pool at startup or give the acquire
+  timeout more headroom.
+- **Local results are sensitive to host contention.** On a busy laptop (iCloud sync,
+  browsers, throttling) we observed ~1.9 s event-loop lag and slow reads even in `release` (`docs/evidence/ci/host-contention.md`).
+  The evidence was captured on an otherwise idle machine and confirmed in CI.
 - **Orders can be left `pending`** if the process dies between the provider call and the
   final UPDATE. The idempotency key makes a reconciler safe, but none is built.
 - **No overall request deadline.** With a dead provider, `release` can take ≈ 3 attempts × 3 s
