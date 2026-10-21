@@ -7,7 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsx watch --import ./src/obs/tracing.ts src/server.ts",
     "start": "node --import ./dist/obs/tracing.js dist/server.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.10.0",
