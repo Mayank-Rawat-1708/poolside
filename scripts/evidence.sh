@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs every scenario against both strategies and saves raw outputs under
-# docs/evidence/runs/<strategy>/. Takes ~8 minutes. Requires `make up`.
+# docs/evidence/runs/<strategy>/, then takes screenshots during a separate
+# spike per strategy. Takes ~13 minutes. Requires `make up`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -14,7 +15,9 @@ k6() { # k6 <strategy> <script> ; k6 exits non-zero when thresholds fail, which 
   docker compose run --rm -e RESULTS_DIR="/results/runs/$1" -e SUMMARY_NAME="$2" k6 run --quiet "/load/$2.js" \
     > "$OUT/$1/$2.stdout.txt" 2>&1 || true
 }
-# Captures DB, metrics, container and visual state while the spike is at its peak.
+# Captures DB, metrics and container state while the spike is at its peak.
+# Text only: rendering browsers here would steal CPU from the API on a laptop
+# and perturb the very run being measured.
 snapshot() {
   local dir="$OUT/$1"
   sleep 30
@@ -22,7 +25,6 @@ snapshot() {
   curl -s localhost:3000/admin/db-sessions "${AUTH[@]}" > "$dir/db-sessions-during-spike.json" || true
   node scripts/prom-snapshot.mjs > "$dir/prometheus-during-spike.txt" 2>&1 || true
   docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' > "$dir/docker-stats-during-spike.txt" || true
-  node scripts/screenshots.mjs docs/evidence/screenshots "$1-spike-" > /dev/null 2>&1 || true
 }
 
 for s in hold release; do
@@ -42,6 +44,19 @@ for s in hold release; do
   downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
   sleep 20 # let rate() windows drain between scenarios
   echo "   slow-downstream"; k6 "$s" slow-downstream
+  sleep 20
+done
+
+# Screenshots come from a separate, unmeasured spike per strategy (see snapshot()).
+for s in hold release; do
+  echo "== screenshots ($s)"
+  strategy "$s"
+  downstream '{"latencyMs":1500,"jitterMs":500,"errorRate":0}'
+  docker compose run --rm -e RESULTS_DIR=/results/tmp k6 run --quiet /load/spike.js > /dev/null 2>&1 &
+  sleep 35
+  node scripts/screenshots.mjs docs/evidence/screenshots "$s-spike-" > /dev/null 2>&1 || true
+  wait
+  downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
   sleep 20
 done
 

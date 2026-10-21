@@ -75,7 +75,7 @@ load-spike: ## k6: burst 10 -> 40 rps
 load-slow: ## k6: 15 rps while the provider is slow (sets latency itself)
 	$(K6) /load/slow-downstream.js
 
-evidence: ## Run all scenarios in hold and release, save outputs to docs/evidence (~8 min)
+evidence: ## Run all scenarios in hold and release, save outputs to docs/evidence (~13 min)
 	@scripts/evidence.sh
 
 screenshots: ## Screenshot console + Grafana in both themes
