@@ -1,6 +1,6 @@
 // Traffic burst: 10 rps -> 40 rps for 30s -> back down.
 // With a fast provider this is comfortable; with a slow one it is not.
-import { summaryTrendStats, thresholds, trafficMix } from './lib/common.js';
+import { summaryTrendStats, thresholdsFor, trafficMix } from './lib/common.js';
 import { summaryFor } from './lib/summary.js';
 
 export const options = {
@@ -20,7 +20,8 @@ export const options = {
       ],
     },
   },
-  thresholds,
+  // provider up to 2000 ms in this scenario, plus margin
+  thresholds: thresholdsFor({ createOrderP95Ms: 3000 }),
   summaryTrendStats,
 };
 

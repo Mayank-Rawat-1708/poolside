@@ -57,9 +57,11 @@ export function setDownstream(behaviour) {
 export const summaryTrendStats = ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'];
 
 // Per-endpoint thresholds make k6 print per-endpoint latency and error rate.
-export const thresholds = {
+// An order can't finish before its payment does, so scenarios with a slow
+// provider pass a higher order bound; reads and health checks keep theirs.
+export const thresholdsFor = ({ createOrderP95Ms = 1000 } = {}) => ({
   http_req_failed: ['rate<0.01'],
-  'http_req_duration{endpoint:create_order}': ['p(95)<1000'],
+  'http_req_duration{endpoint:create_order}': [`p(95)<${createOrderP95Ms}`],
   'http_req_duration{endpoint:get_order}': ['p(95)<200'],
   'http_req_duration{endpoint:health}': ['p(95)<200'],
   'http_req_failed{endpoint:create_order}': ['rate<0.01'],
@@ -72,4 +74,6 @@ export const thresholds = {
   'responses_by_status{status:500}': ['count>=0'],
   'responses_by_status{status:503}': ['count>=0'],
   'responses_by_status{status:0}': ['count>=0'],
-};
+});
+
+export const thresholds = thresholdsFor();

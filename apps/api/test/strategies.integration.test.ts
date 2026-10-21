@@ -2,15 +2,20 @@
 // (the compose one: `make up` or `docker compose up -d postgres migrate`).
 //
 // 40 orders arrive 5ms apart while the payments provider takes 300ms.
-//   hold:    each order pins a connection for ~300ms -> the pool (10) fills
-//            and callers queue (waitingCount climbs well above 0)
-//   release: each checkout lasts a few ms -> nobody ever waits
+//   hold:    each order pins a connection for ~300ms -> the pool (10) fills,
+//            callers queue, and some wait about as long as the provider takes
+//   release: each checkout lasts a few ms -> no caller waits anywhere near
+//            provider latency
+// The assertions compare waits with the provider latency rather than
+// demanding exactly zero queueing: on a slow 2-vCPU CI runner, release still
+// shows momentary blips of a few callers waiting for a few milliseconds.
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createPool } from '../src/db/pool.js';
 import { InstrumentedPool } from '../src/db/instrumented-pool.js';
 import { PaymentsClient } from '../src/downstream/payments-client.js';
+import { newContext, runWithContext } from '../src/obs/request-context.js';
 import { STRATEGIES, type StrategyName } from '../src/orders/strategies/index.js';
 
 const POOL_MAX = 10;
@@ -79,27 +84,34 @@ async function runScenario(strategy: StrategyName) {
     maxWaiting = Math.max(maxWaiting, pool.waitingCount);
   }, 2);
 
+  // Each order runs in its own request context, which accumulates its acquire wait.
+  const contexts = Array.from({ length: ORDERS }, (_, i) => newContext(`it-${strategy}-${i}`, undefined));
   const orders: Promise<unknown>[] = [];
   for (let i = 0; i < ORDERS; i++) {
-    orders.push(STRATEGIES[strategy]({ db, payments }, { customerId: `it_${strategy}`, amountCents: 100 + i }));
+    const input = { customerId: `it_${strategy}`, amountCents: 100 + i };
+    orders.push(runWithContext(contexts[i]!, () => STRATEGIES[strategy]({ db, payments }, input)));
     await sleep(ARRIVAL_GAP_MS);
   }
   const results = await Promise.allSettled(orders);
   clearInterval(sampler);
 
-  return { maxWaiting, failed: results.filter((r) => r.status === 'rejected').length };
+  const maxAcquireMs = Math.max(...contexts.map((c) => c.timings.acquireMs));
+  console.log(`${strategy}: max waiting ${maxWaiting}, max acquire wait ${maxAcquireMs.toFixed(1)}ms`);
+  return { maxWaiting, maxAcquireMs, failed: results.filter((r) => r.status === 'rejected').length };
 }
 
 describe('transaction strategy under concurrency', () => {
   it('hold: connections are pinned across the provider call and callers queue', async () => {
-    const { maxWaiting, failed } = await runScenario('hold');
+    const { maxWaiting, maxAcquireMs, failed } = await runScenario('hold');
     expect(failed).toBe(0);
     expect(maxWaiting).toBeGreaterThanOrEqual(POOL_MAX);
+    expect(maxAcquireMs).toBeGreaterThan(PROVIDER_LATENCY_MS / 2);
   });
 
-  it('release: no caller ever waits for a connection', async () => {
-    const { maxWaiting, failed } = await runScenario('release');
+  it('release: no caller waits anywhere near the provider latency', async () => {
+    const { maxWaiting, maxAcquireMs, failed } = await runScenario('release');
     expect(failed).toBe(0);
-    expect(maxWaiting).toBe(0);
+    expect(maxWaiting).toBeLessThan(POOL_MAX);
+    expect(maxAcquireMs).toBeLessThan(PROVIDER_LATENCY_MS / 3);
   });
 });

@@ -164,12 +164,19 @@ Unit tests can't catch this. The code is correct, and it only fails under concur
 plus dependency latency. Two layers:
 
 - **Every PR:** the integration test (`apps/api/test/strategies.integration.test.ts`)
-  runs both strategies against real Postgres with a 300 ms fake provider and asserts that
-  `pool.waitingCount` stays 0. Cheap (~2 s) and deterministic.
+  runs both strategies against real Postgres with a 300 ms fake provider. It asserts that
+  in `hold` the pool fills and callers wait for a large fraction of the provider latency
+  (locally ~800 ms), while in `release` no caller waits more than a third of it (locally
+  ≤ 6 ms). The test compares waits with provider latency instead of requiring zero
+  queueing, because a slow CI runner shows momentary blips of a few callers waiting a few
+  milliseconds even in `release`. The first CI run failed on exactly that (6 waiting).
+  Cheap (~2 s).
 - **Nightly / on demand:** the `load-test` job in `.github/workflows/ci.yml` brings up the
   stack with compose and runs `load/slow-downstream.js` (provider at 1.2 s ± 0.4 s,
-  15 rps) against the default strategy. k6 thresholds (`http_req_failed < 1%`,
-  per-endpoint p95) fail the job. It catches regressions that reintroduce I/O inside
+  15 rps) with `TX_STRATEGY=release`. k6 thresholds fail the job: error rate < 1%,
+  reads/health p95 < 200 ms, and order p95 < 2.5 s. The order bound is provider-aware,
+  because an order can't beat its payment call. A flat 1 s bound failed the first CI run
+  even with 0% errors. It catches regressions that reintroduce I/O inside
   transactions, and also unrelated capacity regressions. Run it against a
   **pessimistic** dependency profile (latency well above normal), because that is where
   this class of bug lives.

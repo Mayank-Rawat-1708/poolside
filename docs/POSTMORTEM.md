@@ -122,7 +122,7 @@ acquire-wait p99 > 100 ms, acquire timeouts > 0, connection hold ≫ query time,
 | Separate liveness/readiness; readiness off the main pool | Done |
 | Pool, acquire, hold-time, query and downstream metrics; traces; dashboard | Done |
 | Runtime guard + metric for network I/O inside transactions | Done |
-| Integration test asserting no pool queueing under concurrency; nightly load test with a slow provider | Done |
+| Integration test asserting release waits stay far below provider latency; nightly load test with a slow provider | Done |
 | Reconciler for orders stuck in `pending` | Open |
 | Overall request deadline (propagated budget) and circuit breaker for the provider | Open |
 | Deploy the alert rules (Alertmanager) | Open |

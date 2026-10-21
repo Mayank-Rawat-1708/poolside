@@ -1,6 +1,6 @@
 // Moderate steady load while the payments provider is slow (~1.2s ± 0.4s).
 // The script configures the provider itself and restores it afterwards.
-import { DOWNSTREAM, setDownstream, summaryTrendStats, thresholds, trafficMix } from './lib/common.js';
+import { DOWNSTREAM, setDownstream, summaryTrendStats, thresholdsFor, trafficMix } from './lib/common.js';
 import { summaryFor } from './lib/summary.js';
 
 export const options = {
@@ -14,7 +14,8 @@ export const options = {
       maxVUs: 300,
     },
   },
-  thresholds,
+  // provider up to 1600 ms in this scenario, plus margin
+  thresholds: thresholdsFor({ createOrderP95Ms: 2500 }),
   summaryTrendStats,
 };
 

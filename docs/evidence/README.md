@@ -36,8 +36,10 @@ How to read it:
   else, but with no head start.
 - **p95 in `release` still tracks the provider** (~1.5–2 s): an order can't be faster than
   the payment call it waits for. The fix removes the *amplification* (provider latency →
-  everyone's latency, then errors), not the provider's latency itself. The k6 `create_order`
-  p95 threshold (1 s) still fails in `release` for that reason.
+  everyone's latency, then errors), not the provider's latency itself. The recorded runs
+  used a flat 1 s `create_order` p95 threshold, which `release` fails for that reason. The
+  scripts have since been changed to provider-aware order bounds (spike 3 s,
+  slow-downstream 2.5 s). Reads and health keep 200 ms.
 - **Successful throughput**: 8.8 → 26.7 req/s with identical offered load.
 - `hold` errors are 503 `POOL_ACQUIRE_TIMEOUT` because the fail-fast defense is active in
   both strategies. On the original build the same failure was a 500 (`00-naive/`).

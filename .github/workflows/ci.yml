@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Per event type, so a manual run doesn't cancel the push run on the same ref.
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -80,6 +81,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: cp .env.example .env
       - run: docker compose up --build -d --wait api downstream
+      - run: mkdir -p docs/evidence/tmp # k6 writes its summary here
       - run: docker compose run --rm k6 run /load/slow-downstream.js
       - if: always()
         run: docker compose logs api --tail 200
