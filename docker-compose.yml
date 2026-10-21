@@ -1,0 +1,37 @@
+name: poolside
+
+x-pg-env: &pg-env
+  POSTGRES_USER: ${POSTGRES_USER:-poolside}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-poolside}
+  POSTGRES_DB: ${POSTGRES_DB:-poolside}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: *pg-env
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrate:
+    image: postgres:16-alpine
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-poolside}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-poolside}
+      PGDATABASE: ${POSTGRES_DB:-poolside}
+    volumes:
+      - ./db/migrations:/migrations:ro
+      - ./db/migrate.sh:/migrate.sh:ro
+    entrypoint: ["/bin/sh", "/migrate.sh"]
+    restart: "no"
+
+volumes:
+  pgdata:
