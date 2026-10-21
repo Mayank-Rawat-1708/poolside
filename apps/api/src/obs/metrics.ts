@@ -1,5 +1,5 @@
 // Prometheus metrics. One module-level registry; /metrics serves it.
-import { collectDefaultMetrics, Gauge, Histogram, Registry } from 'prom-client';
+import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from 'prom-client';
 
 export const registry = new Registry();
 
@@ -64,3 +64,21 @@ export function registerPoolGauges(read: () => { total: number; idle: number; wa
     });
   }
 }
+
+// --- Downstream (payments provider) ------------------------------------------
+
+export const downstreamDuration = new Histogram({
+  name: 'downstream_request_duration_seconds',
+  help: 'Latency of calls to the payments provider, per attempt',
+  labelNames: ['outcome'] as const,
+  buckets: LATENCY_BUCKETS,
+  registers: [registry],
+});
+
+// outcome: success | http_error | network_error
+export const downstreamRequests = new Counter({
+  name: 'downstream_requests_total',
+  help: 'Calls to the payments provider, per attempt, by outcome',
+  labelNames: ['outcome'] as const,
+  registers: [registry],
+});
