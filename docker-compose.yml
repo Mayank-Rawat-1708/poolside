@@ -57,5 +57,18 @@ services:
       DOWNSTREAM_JITTER_MS: ${DOWNSTREAM_JITTER_MS:-20}
     ports: ["4001:4001"]
 
+  # One-shot load generator: `docker compose run --rm k6 run /load/spike.js`
+  k6:
+    image: grafana/k6:2.3.0
+    profiles: ["tools"]
+    environment:
+      API_URL: http://api:3000
+      DOWNSTREAM_URL: http://downstream:4001
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
+      RESULTS_DIR: /results
+    volumes:
+      - ./load:/load:ro
+      - ./docs/evidence/tmp:/results
+
 volumes:
   pgdata:

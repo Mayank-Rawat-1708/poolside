@@ -15,10 +15,10 @@ AUTH        := -H "authorization: Bearer $(ADMIN_TOKEN)" -H "content-type: appli
 BREAK_LATENCY_MS ?= 1500
 BREAK_JITTER_MS  ?= 500
 
-.PHONY: help up down logs ps break reset psql check
+.PHONY: help up down logs ps break reset psql check load-baseline load-spike load-slow
 
 help: ## Show targets
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 .env:
 	cp .env.example .env
@@ -46,6 +46,17 @@ reset: ## Restore normal downstream behaviour
 
 psql: ## Open psql against the compose database
 	docker compose exec postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+
+K6 := mkdir -p docs/evidence/tmp && docker compose run --rm k6 run --quiet
+
+load-baseline: ## k6: light steady load (5 rps, 30s)
+	$(K6) /load/baseline.js
+
+load-spike: ## k6: burst 10 -> 40 rps
+	$(K6) /load/spike.js
+
+load-slow: ## k6: 15 rps while the provider is slow (sets latency itself)
+	$(K6) /load/slow-downstream.js
 
 check: ## Lint, typecheck and unit tests
 	npm run check

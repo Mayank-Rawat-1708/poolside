@@ -1,0 +1,28 @@
+     ✓ create 201
+     ✓ get 200
+     ✓ health 200
+
+     checks.........................: 100.00% ✓ 150      ✗ 0   
+     data_received..................: 59 kB   2.0 kB/s
+     data_sent......................: 22 kB   730 B/s
+     http_req_blocked...............: avg=366.73µs min=9.45µs  med=29.6µs   max=13.07ms  p(90)=642.49µs p(95)=1.49ms  
+     http_req_connecting............: avg=284.53µs min=0s      med=0s       max=12.84ms  p(90)=500.44µs p(95)=672.39µs
+     http_req_duration..............: avg=53.45ms  min=1.97ms  med=57.97ms  max=227.25ms p(90)=89.23ms  p(95)=93.78ms 
+     ✓ { endpoint:create_order }....: avg=71.75ms  min=43.19ms med=68.14ms  max=227.25ms p(90)=92.28ms  p(95)=96.18ms 
+     ✓ { endpoint:get_order }.......: avg=5ms      min=2.36ms  med=3.8ms    max=14.66ms  p(90)=9.15ms   p(95)=12.76ms 
+     ✓ { endpoint:health }..........: avg=4.39ms   min=1.97ms  med=3.53ms   max=16.79ms  p(90)=4.98ms   p(95)=9.29ms  
+       { expected_response:true }...: avg=53.45ms  min=1.97ms  med=57.97ms  max=227.25ms p(90)=89.23ms  p(95)=93.78ms 
+   ✓ http_req_failed................: 0.00%   ✓ 0        ✗ 150 
+     ✓ { endpoint:create_order }....: 0.00%   ✓ 0        ✗ 109 
+     ✓ { endpoint:get_order }.......: 0.00%   ✓ 0        ✗ 27  
+     ✓ { endpoint:health }..........: 0.00%   ✓ 0        ✗ 14  
+     http_req_receiving.............: avg=255.93µs min=77.41µs med=181.45µs max=3.12ms   p(90)=359.27µs p(95)=499.75µs
+     http_req_sending...............: avg=155.24µs min=38.25µs med=107.35µs max=3.74ms   p(90)=209.24µs p(95)=265.16µs
+     http_req_tls_handshaking.......: avg=0s       min=0s      med=0s       max=0s       p(90)=0s       p(95)=0s      
+     http_req_waiting...............: avg=53.04ms  min=1.78ms  med=57.62ms  max=226.99ms p(90)=88.36ms  p(95)=93.39ms 
+     http_reqs......................: 150     4.998436/s
+     iteration_duration.............: avg=55.15ms  min=2.43ms  med=59.01ms  max=230.52ms p(90)=91.56ms  p(95)=98.91ms 
+     iterations.....................: 150     4.998436/s
+     responses_by_status............: 150     4.998436/s
+     vus............................: 0       min=0      max=0 
+     vus_max........................: 20      min=20     max=20
