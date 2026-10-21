@@ -82,6 +82,8 @@ export function registerHttpHooks(app: FastifyInstance, opts: HookOptions) {
     }
     if (reply.statusCode >= 500) req.log.error(fields, 'request completed');
     else req.log.info(fields, 'request completed');
+    // Orchestrator probes would crowd real traffic out of the explorer.
+    if (route === '/health/live' || route === '/health/ready') return done();
     opts.recent.push({
       requestId: req.id,
       traceId: req.ctx.traceId,
