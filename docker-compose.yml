@@ -33,5 +33,14 @@ services:
     entrypoint: ["/bin/sh", "/migrate.sh"]
     restart: "no"
 
+  downstream:
+    build: { context: ., dockerfile: apps/downstream/Dockerfile }
+    environment:
+      PORT: 4001
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
+      DOWNSTREAM_LATENCY_MS: ${DOWNSTREAM_LATENCY_MS:-50}
+      DOWNSTREAM_JITTER_MS: ${DOWNSTREAM_JITTER_MS:-20}
+    ports: ["4001:4001"]
+
 volumes:
   pgdata:
