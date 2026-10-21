@@ -135,3 +135,8 @@ routes.
 - Taking browser screenshots during a measured run on the same laptop starved the API's CPU
   and produced 503s even in `release` (`evidence/observer-effect/`). Measurement and
   screenshots are now separate.
+- pg uses one `connectionTimeoutMillis` for two situations with two different messages:
+  waiting for a free connection ("timeout exceeded when trying to connect") and opening a
+  new one ("Connection terminated due to connection timeout"). Only the first was mapped to
+  the typed 503 at first. On a cold CI runner, 4 of 902 requests hit the second case and
+  surfaced as untyped 500s. Both are now classified (`isPoolTimeout`, with a unit test).

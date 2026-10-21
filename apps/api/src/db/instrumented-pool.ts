@@ -69,9 +69,9 @@ export class InstrumentedPool {
       this.guard(client);
       return client;
     } catch (err) {
-      // pg reports a pool timeout as a plain Error with this message;
-      // turn it into a typed error so it can't be mistaken for a DB outage.
-      if (err instanceof Error && err.message.includes('timeout exceeded when trying to connect')) {
+      // Turn pg's untyped pool timeouts into a typed error so they can't be
+      // mistaken for a DB outage or a bug.
+      if (isPoolTimeout(err)) {
         outcome = 'timeout';
         throw new PoolAcquireTimeoutError(performance.now() - start, this.stats(), { cause: err });
       }
@@ -136,4 +136,17 @@ function trackTransaction(name: string) {
   if (!ctx) return;
   if (name === 'begin') ctx.openTransactions++;
   else if (name === 'commit' || name === 'rollback') ctx.openTransactions = Math.max(0, ctx.openTransactions - 1);
+}
+
+// connectionTimeoutMillis covers both ways to get a connection, and pg words
+// them differently:
+//   - waiting for a free one:  "timeout exceeded when trying to connect"
+//   - opening a new one:       "Connection terminated due to connection timeout"
+// Either way the caller had no usable connection within the budget.
+export function isPoolTimeout(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  return (
+    err.message.includes('timeout exceeded when trying to connect') ||
+    err.message.includes('Connection terminated due to connection timeout')
+  );
 }
