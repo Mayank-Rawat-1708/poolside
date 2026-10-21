@@ -10,6 +10,7 @@ import { orderRoutes } from './orders/routes.js';
 import { isStrategyName, StrategySwitch } from './orders/strategies/index.js';
 import { loggingOptions, registerHttpHooks } from './obs/http-hooks.js';
 import { appErrors, registry } from './obs/metrics.js';
+import { RecentRequests } from './obs/recent-requests.js';
 
 export interface AppDeps {
   config: Config;
@@ -20,7 +21,8 @@ export interface AppDeps {
 export function buildApp({ config, pool, opsPool }: AppDeps) {
   const app = Fastify(loggingOptions(config.logLevel));
   const db = new InstrumentedPool(pool);
-  registerHttpHooks(app, { poolStats: () => db.stats() });
+  const recent = new RecentRequests(500);
+  registerHttpHooks(app, { poolStats: () => db.stats(), recent });
   const payments = new PaymentsClient(config.downstreamUrl, config.chargePolicy);
   if (!isStrategyName(config.txStrategy)) throw new Error(`unknown TX_STRATEGY "${config.txStrategy}"`);
   const strategy = new StrategySwitch(config.txStrategy);
@@ -48,6 +50,6 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
 
   app.register(healthRoutes, { db, opsPool });
   app.register(orderRoutes, { db, payments, strategy });
-  app.register(adminRoutes, { adminToken: config.adminToken, opsPool, strategy });
+  app.register(adminRoutes, { adminToken: config.adminToken, opsPool, strategy, recent });
   return app;
 }

@@ -6,6 +6,7 @@ import { stdTimeFunctions } from 'pino';
 import { httpRequestDuration } from './metrics.js';
 import { currentTraceId } from './spans.js';
 import type { PoolStats } from '../db/instrumented-pool.js';
+import type { RecentRequests } from './recent-requests.js';
 import { newContext, runWithContext, type RequestContext } from './request-context.js';
 
 // Accept a caller's request id only if it looks like one; otherwise mint our own.
@@ -37,7 +38,12 @@ declare module 'fastify' {
   }
 }
 
-export function registerHttpHooks(app: FastifyInstance, opts: { poolStats: () => PoolStats }) {
+interface HookOptions {
+  poolStats: () => PoolStats;
+  recent: RecentRequests;
+}
+
+export function registerHttpHooks(app: FastifyInstance, opts: HookOptions) {
   // Callback-style hook: everything after done() runs inside the context.
   app.addHook('onRequest', (req, reply, done) => {
     reply.header('x-request-id', req.id);
@@ -53,7 +59,11 @@ export function registerHttpHooks(app: FastifyInstance, opts: { poolStats: () =>
     const route = req.routeOptions.url ?? 'unmatched';
     // Prometheus scrapes are not user traffic: keep them out of metrics and logs.
     if (route === '/metrics') return done();
-    httpRequestDuration.labels(req.method, route, String(reply.statusCode)).observe(reply.elapsedTime / 1000);
+    // Admin polling (the console) is operational traffic: logged at debug only.
+    const operational = route.startsWith('/admin');
+    if (!operational) {
+      httpRequestDuration.labels(req.method, route, String(reply.statusCode)).observe(reply.elapsedTime / 1000);
+    }
 
     const fields = {
       traceId: req.ctx.traceId,
@@ -66,8 +76,23 @@ export function registerHttpHooks(app: FastifyInstance, opts: { poolStats: () =>
       timings: roundTimings(req.ctx.timings),
       pool: opts.poolStats(),
     };
+    if (operational) {
+      req.log.debug(fields, 'request completed');
+      return done();
+    }
     if (reply.statusCode >= 500) req.log.error(fields, 'request completed');
     else req.log.info(fields, 'request completed');
+    opts.recent.push({
+      requestId: req.id,
+      traceId: req.ctx.traceId,
+      method: req.method,
+      route,
+      status: reply.statusCode,
+      durationMs: fields.durationMs,
+      timings: fields.timings,
+      errorClass: req.errorClass,
+      finishedAt: new Date().toISOString(),
+    });
     done();
   });
 }

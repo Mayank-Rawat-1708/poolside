@@ -1,12 +1,14 @@
 import { timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import type pg from 'pg';
+import type { RecentRequests } from '../obs/recent-requests.js';
 import { isStrategyName, STRATEGIES, type StrategySwitch } from '../orders/strategies/index.js';
 
 interface Deps {
   adminToken: string;
   opsPool: pg.Pool;
   strategy: StrategySwitch;
+  recent: RecentRequests;
 }
 
 function tokenMatches(header: string | undefined, token: string): boolean {
@@ -29,7 +31,7 @@ const SESSIONS_SQL = `
   GROUP BY 1
   ORDER BY 2 DESC`;
 
-export async function adminRoutes(app: FastifyInstance, { adminToken, opsPool, strategy }: Deps) {
+export async function adminRoutes(app: FastifyInstance, { adminToken, opsPool, strategy, recent }: Deps) {
   app.addHook('onRequest', async (req, reply) => {
     if (!tokenMatches(req.headers.authorization, adminToken)) {
       return reply.code(401).send({ error: 'unauthorized' });
@@ -48,6 +50,12 @@ export async function adminRoutes(app: FastifyInstance, { adminToken, opsPool, s
     req.log.warn({ previous, strategy: next }, 'tx strategy changed');
     return { strategy: next, previous };
   });
+
+  app.get<{ Querystring: { limit?: number } }>(
+    '/admin/requests',
+    { schema: { querystring: { type: 'object', properties: { limit: { type: 'integer', minimum: 1, maximum: 500 } } } } },
+    async (req) => ({ requests: recent.latest(req.query.limit ?? 100) }),
+  );
 
   app.get('/admin/db-sessions', async () => {
     const { rows } = await opsPool.query(SESSIONS_SQL);
