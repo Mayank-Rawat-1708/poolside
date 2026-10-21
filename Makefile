@@ -15,7 +15,7 @@ AUTH        := -H "authorization: Bearer $(ADMIN_TOKEN)" -H "content-type: appli
 BREAK_LATENCY_MS ?= 1500
 BREAK_JITTER_MS  ?= 500
 
-.PHONY: help up down logs ps break fix hold strategy reset psql check pg-activity load-baseline load-spike load-slow
+.PHONY: help up down logs ps break fix hold strategy reset psql check test-integration pg-activity load-baseline load-spike load-slow
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -75,3 +75,6 @@ load-slow: ## k6: 15 rps while the provider is slow (sets latency itself)
 
 check: ## Lint, typecheck and unit tests
 	npm run check
+
+test-integration: ## Integration tests (needs the compose Postgres: make up)
+	npm run test:integration
