@@ -25,6 +25,7 @@ help: ## Show targets
 
 up: .env ## Build and start the whole stack
 	docker compose up --build -d
+	@echo "Console     http://localhost:8080"
 	@echo "API         $(API)"
 	@echo "Grafana     http://localhost:3001"
 	@echo "Prometheus  http://localhost:9090"

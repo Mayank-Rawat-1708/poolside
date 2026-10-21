@@ -1,0 +1,42 @@
+/*
+ * Design tokens: the only place colors are defined.
+ * Values are RGB channels ("r g b") so they compose with alpha:
+ * rgb(var(--color-danger) / 0.1). Every text/background pair below meets
+ * WCAG AA (>= 4.5:1) in both themes.
+ */
+:root,
+[data-theme='light'] {
+  --color-bg: 246 247 249;
+  --color-surface: 255 255 255;
+  --color-surface-2: 241 243 246;
+  --color-border: 222 226 231;
+  --color-text: 17 24 32;
+  --color-text-muted: 88 98 112;
+  --color-accent: 37 89 214;
+  --color-accent-fg: 255 255 255;
+  --color-success: 22 122 67;
+  --color-warning: 158 90 0;
+  --color-danger: 197 40 40;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --color-bg: 10 12 15;
+  --color-surface: 17 20 25;
+  --color-surface-2: 24 28 34;
+  --color-border: 39 45 54;
+  --color-text: 230 233 237;
+  --color-text-muted: 152 162 175;
+  --color-accent: 122 156 255;
+  --color-accent-fg: 10 12 15;
+  --color-success: 74 201 128;
+  --color-warning: 232 173 70;
+  --color-danger: 255 112 112;
+  color-scheme: dark;
+}
+
+:root {
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+}

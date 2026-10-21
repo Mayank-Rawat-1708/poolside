@@ -70,6 +70,15 @@ services:
       DOWNSTREAM_JITTER_MS: ${DOWNSTREAM_JITTER_MS:-20}
     ports: ["4001:4001"]
 
+  console:
+    build: { context: ., dockerfile: apps/console/Dockerfile }
+    restart: unless-stopped
+    depends_on: [api, downstream, prometheus]
+    environment:
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
+    # Loopback only: the console proxies admin calls with the token attached.
+    ports: ["127.0.0.1:8080:80"]
+
   prometheus:
     image: prom/prometheus:v3.5.0
     command:

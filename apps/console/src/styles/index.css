@@ -1,0 +1,43 @@
+@import './tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-bg text-text font-sans text-base antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  body {
+    @apply bg-bg;
+    min-width: 1024px;
+  }
+  /* One focus treatment everywhere. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-accent));
+    outline-offset: 2px;
+  }
+  /* Numbers never shift width as they update. */
+  .num {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .slider::-webkit-slider-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-accent bg-surface;
+  }
+  .slider::-moz-range-thumb {
+    @apply h-4 w-4 rounded-full border-2 border-accent bg-surface;
+  }
+}
