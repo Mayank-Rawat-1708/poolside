@@ -1,6 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { downstreamDuration, downstreamRequests } from '../obs/metrics.js';
 import { addTiming, currentContext } from '../obs/request-context.js';
+import { inSpan } from '../obs/spans.js';
 
 export interface ChargeResult {
   paymentRef: string;
@@ -9,7 +10,11 @@ export interface ChargeResult {
 export class PaymentsClient {
   constructor(private readonly baseUrl: string) {}
 
-  async charge(orderId: string, amountCents: number): Promise<ChargeResult> {
+  charge(orderId: string, amountCents: number): Promise<ChargeResult> {
+    return inSpan('downstream.charge', { 'order.id': orderId }, () => this.attempt(orderId, amountCents));
+  }
+
+  private async attempt(orderId: string, amountCents: number): Promise<ChargeResult> {
     const start = performance.now();
     let outcome = 'network_error';
     try {

@@ -27,6 +27,7 @@ up: .env ## Build and start the whole stack
 	docker compose up --build -d
 	@echo "API         $(API)"
 	@echo "Prometheus  http://localhost:9090"
+	@echo "Jaeger      http://localhost:16686"
 
 down: ## Stop the stack and delete volumes
 	docker compose down -v --remove-orphans

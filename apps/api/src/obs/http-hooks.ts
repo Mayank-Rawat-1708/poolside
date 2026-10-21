@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import type { FastifyInstance, FastifyServerOptions } from 'fastify';
+import { trace } from '@opentelemetry/api';
+import { LogController, type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import { stdTimeFunctions } from 'pino';
 import { httpRequestDuration } from './metrics.js';
+import { currentTraceId } from './spans.js';
 import type { PoolStats } from '../db/instrumented-pool.js';
 import { newContext, runWithContext, type RequestContext } from './request-context.js';
 
@@ -23,9 +25,8 @@ export function loggingOptions(level: string): FastifyServerOptions {
     },
     requestIdHeader: false,
     genReqId: requestIdFrom,
-    requestIdLogLabel: 'requestId',
     // We emit one summary line per request ourselves (see below).
-    disableRequestLogging: true,
+    logController: new LogController({ requestIdLogLabel: 'requestId', disableRequestLogging: true }),
   };
 }
 
@@ -40,20 +41,22 @@ export function registerHttpHooks(app: FastifyInstance, opts: { poolStats: () =>
   // Callback-style hook: everything after done() runs inside the context.
   app.addHook('onRequest', (req, reply, done) => {
     reply.header('x-request-id', req.id);
-    req.ctx = newContext(req.id);
+    req.ctx = newContext(req.id, currentTraceId());
+    // Name the server span after the route template ("POST /orders"), not the raw URL.
+    const route = req.routeOptions.url;
+    if (route) trace.getActiveSpan()?.updateName(`${req.method} ${route}`).setAttribute('http.route', route);
     runWithContext(req.ctx, done);
   });
 
   app.addHook('onResponse', (req, reply, done) => {
     // Use the route template, not the raw URL, to keep label cardinality bounded.
     const route = req.routeOptions.url ?? 'unmatched';
-    if (route !== '/metrics') {
-      httpRequestDuration
-        .labels(req.method, route, String(reply.statusCode))
-        .observe(reply.elapsedTime / 1000);
-    }
+    // Prometheus scrapes are not user traffic: keep them out of metrics and logs.
+    if (route === '/metrics') return done();
+    httpRequestDuration.labels(req.method, route, String(reply.statusCode)).observe(reply.elapsedTime / 1000);
 
     const fields = {
+      traceId: req.ctx.traceId,
       method: req.method,
       route,
       status: reply.statusCode,

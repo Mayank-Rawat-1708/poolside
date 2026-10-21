@@ -46,6 +46,8 @@ services:
       PGDATABASE: ${POSTGRES_DB:-poolside}
       DB_POOL_MAX: ${DB_POOL_MAX:-10}
       DOWNSTREAM_URL: http://downstream:4001
+      OTEL_SERVICE_NAME: poolside-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports: ["3000:3000"]
 
   downstream:
@@ -65,6 +67,13 @@ services:
     volumes:
       - ./infra/prometheus:/etc/prometheus:ro
     ports: ["9090:9090"]
+
+  # All-in-one Jaeger v2 accepts OTLP directly; no separate collector needed here.
+  jaeger:
+    image: jaegertracing/jaeger:2.9.0
+    ports:
+      - "16686:16686" # UI
+      - "4318:4318"   # OTLP/HTTP
 
   # One-shot load generator: `docker compose run --rm k6 run /load/spike.js`
   k6:

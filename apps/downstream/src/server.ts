@@ -1,7 +1,7 @@
 // "payments" mock: a third-party provider we don't control.
 // Latency, jitter and error rate are adjustable at runtime so we can
 // simulate a provider having a bad day without restarting anything.
-import Fastify from 'fastify';
+import Fastify, { LogController } from 'fastify';
 import { randomUUID } from 'node:crypto';
 
 interface Behaviour {
@@ -33,7 +33,7 @@ function sampleDelay(): number {
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? 'info', base: { service: 'downstream' } },
   requestIdHeader: 'x-request-id',
-  requestIdLogLabel: 'requestId',
+  logController: new LogController({ requestIdLogLabel: 'requestId' }),
 });
 
 app.post<{ Body: { orderId: string; amountCents: number } }>(

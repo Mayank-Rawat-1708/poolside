@@ -10,13 +10,14 @@ export interface Timings {
 
 export interface RequestContext {
   requestId: string;
+  traceId: string | undefined;
   timings: Timings;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
 
-export function newContext(requestId: string): RequestContext {
-  return { requestId, timings: { acquireMs: 0, queryMs: 0, downstreamMs: 0 } };
+export function newContext(requestId: string, traceId: string | undefined): RequestContext {
+  return { requestId, traceId, timings: { acquireMs: 0, queryMs: 0, downstreamMs: 0 } };
 }
 
 export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {

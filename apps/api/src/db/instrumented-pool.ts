@@ -7,7 +7,9 @@
 // would fold pool wait into "query time" and hide exactly that difference.
 import type pg from 'pg';
 import { performance } from 'node:perf_hooks';
+import type { Span } from '@opentelemetry/api';
 import { addTiming } from '../obs/request-context.js';
+import { inSpan, tracer } from '../obs/spans.js';
 import {
   dbConnectionHold,
   dbPoolAcquireWait,
@@ -26,6 +28,8 @@ export interface PoolStats {
 
 export class InstrumentedPool {
   private readonly acquiredAt = new WeakMap<pg.PoolClient, number>();
+  // Spans covering the whole checkout, so traces show what ran while a connection was held.
+  private readonly heldSpans = new WeakMap<pg.PoolClient, Span>();
 
   constructor(readonly pool: pg.Pool) {
     registerPoolGauges(() => this.stats());
@@ -34,6 +38,8 @@ export class InstrumentedPool {
     pool.on('release', (_err, client) => {
       const start = this.acquiredAt.get(client);
       if (start !== undefined) dbConnectionHold.observe((performance.now() - start) / 1000);
+      this.heldSpans.get(client)?.end();
+      this.heldSpans.delete(client);
     });
   }
 
@@ -47,10 +53,17 @@ export class InstrumentedPool {
   }
 
   async acquire(): Promise<pg.PoolClient> {
+    const before = this.stats();
     const start = performance.now();
     let outcome = 'ok';
     try {
-      return await this.pool.connect();
+      const client = await inSpan(
+        'db.pool.acquire',
+        { 'db.pool.waiting': before.waiting, 'db.pool.idle': before.idle, 'db.pool.total': before.total },
+        () => this.pool.connect(),
+      );
+      this.heldSpans.set(client, tracer.startSpan('db.connection.held'));
+      return client;
     } catch (err) {
       outcome = 'error';
       throw err;

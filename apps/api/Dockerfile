@@ -16,4 +16,4 @@ RUN npm ci -w @poolside/api --include-workspace-root=false --omit=dev && npm cac
 COPY --from=build /repo/apps/api/dist apps/api/dist
 USER node
 EXPOSE 3000
-CMD ["node", "apps/api/dist/server.js"]
+CMD ["node", "--import", "./apps/api/dist/obs/tracing.js", "apps/api/dist/server.js"]
