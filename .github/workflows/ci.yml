@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  integration:
+    name: integration tests (postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: poolside
+          POSTGRES_PASSWORD: poolside
+          POSTGRES_DB: poolside
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U poolside"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      PGHOST: localhost
+      PGUSER: poolside
+      PGPASSWORD: poolside
+      PGDATABASE: poolside
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Apply migrations
+        run: MIGRATIONS_DIR=db/migrations sh db/migrate.sh
+      - run: npm run test:integration
+
+  docker:
+    name: docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose build

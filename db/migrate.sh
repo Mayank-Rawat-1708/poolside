@@ -8,7 +8,9 @@ psql -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS schema_migrations (
   applied_at timestamptz NOT NULL DEFAULT now()
 );"
 
-for f in /migrations/*.sql; do
+MIGRATIONS_DIR="${MIGRATIONS_DIR:-/migrations}"
+
+for f in "$MIGRATIONS_DIR"/*.sql; do
   name=$(basename "$f")
   applied=$(psql -tAc "SELECT 1 FROM schema_migrations WHERE filename = '$name'")
   if [ "$applied" = "1" ]; then
