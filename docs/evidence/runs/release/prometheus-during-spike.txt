@@ -1,0 +1,18 @@
+# Prometheus snapshot 2026-10-21T09:10:33.256Z
+requests/s               37.854
+5xx ratio                0
+http p95                 2.389 s
+http p99                 2.478 s
+pool in use              1
+pool max                 10
+pool waiting             0
+acquire wait p99         6.9 ms
+connection hold p99      43.0 ms
+db query p99             43.0 ms
+downstream p99           2.485 s
+downstream retries/s     0
+event loop lag p99       50.0 ms
+api cpu (cores)          0.281
+api heap used            39.0 MiB
+pg idle in transaction   0
+pg active                1

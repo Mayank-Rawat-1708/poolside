@@ -1,0 +1,11 @@
+== sessions by state
+ state | sessions | longest_in_state_s | oldest_xact_s 
+-------+----------+--------------------+---------------
+ idle  |        6 |              11.88 |              
+(1 row)
+
+== oldest open transactions (last statement each ran)
+ pid | application_name | state | xact_age_s | in_state_s | last_query 
+-----+------------------+-------+------------+------------+------------
+(0 rows)
+

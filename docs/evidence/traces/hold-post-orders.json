@@ -1,0 +1,690 @@
+{
+ "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+ "spans": [
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "e5d0b28098714495",
+   "operationName": "pg.query:INSERT poolside",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573641692000,
+   "duration": 1110,
+   "tags": [
+    {
+     "key": "db.namespace",
+     "type": "string",
+     "value": "poolside"
+    },
+    {
+     "key": "db.query.text",
+     "type": "string",
+     "value": "INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $2) RETURNING id, customer_id AS \"customerId\", amount_cents AS \"amountCents\", status,\n  payment_ref AS \"paymentRef\", created_at AS \"createdAt\", updated_at AS \"updatedAt\""
+    },
+    {
+     "key": "db.system.name",
+     "type": "string",
+     "value": "postgresql"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-pg"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.77.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "postgres"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 5432
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "0d7de2e1721dddce",
+   "operationName": "downstream.charge",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573641694000,
+   "duration": 1775470,
+   "tags": [
+    {
+     "key": "order.id",
+     "type": "string",
+     "value": "5208fc48-9d83-4ec4-884e-2c24d25ae73d"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "poolside-api"
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "internal"
+    }
+   ],
+   "logs": [
+    {
+     "timestamp": 1792573641694043,
+     "fields": [
+      {
+       "key": "event",
+       "type": "string",
+       "value": "network_io_in_transaction"
+      },
+      {
+       "key": "target",
+       "type": "string",
+       "value": "payments.charge"
+      }
+     ]
+    }
+   ],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "d703714e104bf90e",
+   "operationName": "pg.query:UPDATE poolside",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573643469000,
+   "duration": 1995,
+   "tags": [
+    {
+     "key": "db.namespace",
+     "type": "string",
+     "value": "poolside"
+    },
+    {
+     "key": "db.query.text",
+     "type": "string",
+     "value": "UPDATE orders SET status = $2, payment_ref = $3, updated_at = clock_timestamp()\n     WHERE id = $1 RETURNING id, customer_id AS \"customerId\", amount_cents AS \"amountCents\", status,\n  payment_ref AS \"paymentRef\", created_at AS \"createdAt\", updated_at AS \"updatedAt\""
+    },
+    {
+     "key": "db.system.name",
+     "type": "string",
+     "value": "postgresql"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-pg"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.77.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "postgres"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 5432
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "26cfddc389ad697e",
+   "operationName": "pg.query:COMMIT poolside",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573643471000,
+   "duration": 1232,
+   "tags": [
+    {
+     "key": "db.namespace",
+     "type": "string",
+     "value": "poolside"
+    },
+    {
+     "key": "db.query.text",
+     "type": "string",
+     "value": "COMMIT"
+    },
+    {
+     "key": "db.system.name",
+     "type": "string",
+     "value": "postgresql"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-pg"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.77.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "postgres"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 5432
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "92d4c55f37218451",
+   "operationName": "pg.query:BEGIN poolside",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573641692000,
+   "duration": 709,
+   "tags": [
+    {
+     "key": "db.namespace",
+     "type": "string",
+     "value": "poolside"
+    },
+    {
+     "key": "db.query.text",
+     "type": "string",
+     "value": "BEGIN"
+    },
+    {
+     "key": "db.system.name",
+     "type": "string",
+     "value": "postgresql"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-pg"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.77.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "postgres"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 5432
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "d99a8afefc6fdfb9",
+   "operationName": "db.pool.acquire",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573640696000,
+   "duration": 995428,
+   "tags": [
+    {
+     "key": "db.pool.idle",
+     "type": "int64",
+     "value": 0
+    },
+    {
+     "key": "db.pool.total",
+     "type": "int64",
+     "value": 10
+    },
+    {
+     "key": "db.pool.waiting",
+     "type": "int64",
+     "value": 19
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "poolside-api"
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "internal"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "b0703a8f8d56c6f2",
+   "operationName": "db.connection.held",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "b117e4dfd03c5793"
+    }
+   ],
+   "startTime": 1792573641692000,
+   "duration": 1781006,
+   "tags": [
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "poolside-api"
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "internal"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": [
+    "clock skew adjustment disabled; not applying calculated delta of -498.632209ms"
+   ]
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "b117e4dfd03c5793",
+   "operationName": "POST /orders",
+   "references": [],
+   "startTime": 1792573640695000,
+   "duration": 2777742,
+   "tags": [
+    {
+     "key": "client.address",
+     "type": "string",
+     "value": "172.19.0.10"
+    },
+    {
+     "key": "http.request.method",
+     "type": "string",
+     "value": "POST"
+    },
+    {
+     "key": "http.response.status_code",
+     "type": "int64",
+     "value": 201
+    },
+    {
+     "key": "http.route",
+     "type": "string",
+     "value": "/orders"
+    },
+    {
+     "key": "network.peer.address",
+     "type": "string",
+     "value": "172.19.0.10"
+    },
+    {
+     "key": "network.peer.port",
+     "type": "int64",
+     "value": 46054
+    },
+    {
+     "key": "network.protocol.version",
+     "type": "string",
+     "value": "1.1"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-http"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.300.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "api"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 3000
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "server"
+    },
+    {
+     "key": "url.path",
+     "type": "string",
+     "value": "/orders"
+    },
+    {
+     "key": "url.scheme",
+     "type": "string",
+     "value": "http"
+    },
+    {
+     "key": "user_agent.original",
+     "type": "string",
+     "value": "Grafana k6/2.3.0"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "1f7080c0edce2501",
+   "operationName": "POST",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "0d7de2e1721dddce"
+    }
+   ],
+   "startTime": 1792573641694000,
+   "duration": 1774087,
+   "tags": [
+    {
+     "key": "http.request.method",
+     "type": "string",
+     "value": "POST"
+    },
+    {
+     "key": "http.request.method_original",
+     "type": "string",
+     "value": "POST"
+    },
+    {
+     "key": "http.response.status_code",
+     "type": "int64",
+     "value": 200
+    },
+    {
+     "key": "network.peer.address",
+     "type": "string",
+     "value": "172.19.0.4"
+    },
+    {
+     "key": "network.peer.port",
+     "type": "int64",
+     "value": 4001
+    },
+    {
+     "key": "network.protocol.version",
+     "type": "string",
+     "value": "1.1"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-undici"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.34.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "downstream"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 4001
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    },
+    {
+     "key": "url.full",
+     "type": "string",
+     "value": "http://downstream:4001/charge"
+    },
+    {
+     "key": "url.path",
+     "type": "string",
+     "value": "/charge"
+    },
+    {
+     "key": "url.query",
+     "type": "string",
+     "value": ""
+    },
+    {
+     "key": "url.scheme",
+     "type": "string",
+     "value": "http"
+    },
+    {
+     "key": "user_agent.original",
+     "type": "string",
+     "value": "node"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  },
+  {
+   "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+   "spanID": "a8e29b1a091a6cbb",
+   "operationName": "pg-pool.connect",
+   "references": [
+    {
+     "refType": "CHILD_OF",
+     "traceID": "ecdc411b164b68555fdb9b4af9183b61",
+     "spanID": "d99a8afefc6fdfb9"
+    }
+   ],
+   "startTime": 1792573640696000,
+   "duration": 995361,
+   "tags": [
+    {
+     "key": "db.namespace",
+     "type": "string",
+     "value": "poolside"
+    },
+    {
+     "key": "db.postgresql.idle.timeout.millis",
+     "type": "int64",
+     "value": 30000
+    },
+    {
+     "key": "db.system.name",
+     "type": "string",
+     "value": "postgresql"
+    },
+    {
+     "key": "otel.scope.name",
+     "type": "string",
+     "value": "@opentelemetry/instrumentation-pg"
+    },
+    {
+     "key": "otel.scope.version",
+     "type": "string",
+     "value": "0.77.0"
+    },
+    {
+     "key": "server.address",
+     "type": "string",
+     "value": "postgres"
+    },
+    {
+     "key": "server.port",
+     "type": "int64",
+     "value": 5432
+    },
+    {
+     "key": "span.kind",
+     "type": "string",
+     "value": "client"
+    }
+   ],
+   "logs": [],
+   "processID": "p1",
+   "warnings": null
+  }
+ ],
+ "processes": {
+  "p1": {
+   "serviceName": "poolside-api",
+   "tags": [
+    {
+     "key": "host.arch",
+     "type": "string",
+     "value": "arm64"
+    },
+    {
+     "key": "host.name",
+     "type": "string",
+     "value": "081dacd4b21c"
+    },
+    {
+     "key": "process.command",
+     "type": "string",
+     "value": "/repo/apps/api/dist/server.js"
+    },
+    {
+     "key": "process.command_args",
+     "type": "string",
+     "value": "[\"/usr/local/bin/node\",\"--import\",\"./apps/api/dist/obs/tracing.js\",\"/repo/apps/api/dist/server.js\"]"
+    },
+    {
+     "key": "process.executable.name",
+     "type": "string",
+     "value": "node"
+    },
+    {
+     "key": "process.executable.path",
+     "type": "string",
+     "value": "/usr/local/bin/node"
+    },
+    {
+     "key": "process.owner",
+     "type": "string",
+     "value": "node"
+    },
+    {
+     "key": "process.pid",
+     "type": "int64",
+     "value": 1
+    },
+    {
+     "key": "process.runtime.description",
+     "type": "string",
+     "value": "Node.js"
+    },
+    {
+     "key": "process.runtime.name",
+     "type": "string",
+     "value": "nodejs"
+    },
+    {
+     "key": "process.runtime.version",
+     "type": "string",
+     "value": "22.23.3"
+    },
+    {
+     "key": "telemetry.sdk.language",
+     "type": "string",
+     "value": "nodejs"
+    },
+    {
+     "key": "telemetry.sdk.name",
+     "type": "string",
+     "value": "opentelemetry"
+    },
+    {
+     "key": "telemetry.sdk.version",
+     "type": "string",
+     "value": "3.0.0"
+    }
+   ]
+  }
+ },
+ "warnings": null
+}

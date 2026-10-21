@@ -1,0 +1,22 @@
+== sessions by state
+        state        | sessions | longest_in_state_s | oldest_xact_s 
+---------------------+----------+--------------------+---------------
+ idle in transaction |       10 |               1.79 |          1.79
+ idle                |        2 |               4.53 |              
+(2 rows)
+
+== oldest open transactions (last statement each ran)
+ pid | application_name |        state        | xact_age_s | in_state_s |                          last_query                          
+-----+------------------+---------------------+------------+------------+--------------------------------------------------------------
+ 262 | poolside-api     | idle in transaction |       1.80 |       1.80 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 103 | poolside-api     | idle in transaction |       1.24 |       1.23 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 266 | poolside-api     | idle in transaction |       1.06 |       1.06 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 260 | poolside-api     | idle in transaction |       1.06 |       1.05 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 265 | poolside-api     | idle in transaction |       0.59 |       0.59 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 259 | poolside-api     | idle in transaction |       0.25 |       0.25 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 263 | poolside-api     | idle in transaction |       0.23 |       0.22 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 261 | poolside-api     | idle in transaction |       0.20 |       0.20 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 264 | poolside-api     | idle in transaction |       0.08 |       0.08 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+ 267 | poolside-api     | idle in transaction |       0.04 |       0.04 | INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $
+(10 rows)
+

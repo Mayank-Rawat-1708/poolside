@@ -1,0 +1,13 @@
+# release: POST /orders, trace 2e90d87f9584a5226aba4ba3044711f6 (p90 of 300 successful orders in the spike window)
+start_ms  dur_ms  span
+     0.0  1916.0  POST /orders
+     1.0     0.1  db.pool.acquire
+     1.0     0.1  pg-pool.connect
+     6.0     1.6  db.connection.held
+     7.0     1.0  pg.query:INSERT poolside
+     8.0  1894.4  downstream.charge
+     9.0  1892.5  POST
+  1911.0     1.8  db.pool.acquire
+  1911.0     1.8  pg-pool.connect
+  1913.0     2.3  db.connection.held
+  1913.0     2.2  pg.query:UPDATE poolside

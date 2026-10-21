@@ -1,0 +1,35 @@
+     ✗ create 201
+      ↳  99% — ✓ 1297 / ✗ 2
+     ✓ health 200
+     ✓ get 200
+
+     checks.........................: 99.89% ✓ 1827      ✗ 2   
+     data_received..................: 807 kB 11 kB/s
+     data_sent......................: 265 kB 3.7 kB/s
+     dropped_iterations.............: 70     0.981031/s
+     http_req_blocked...............: avg=177.43µs min=2.16µs   med=10.54µs  max=44.91ms p(90)=54.12µs  p(95)=350.08µs p(99)=2.29ms  
+     http_req_connecting............: avg=118.53µs min=0s       med=0s       max=44.77ms p(90)=0s       p(95)=200.99µs p(99)=1.79ms  
+     http_req_duration..............: avg=1.21s    min=724.2µs  med=1.38s    max=4.78s   p(90)=1.98s    p(95)=2.6s     p(99)=3.88s   
+     ✗ { endpoint:create_order }....: avg=1.69s    min=1s       med=1.58s    max=4.78s   p(90)=2.18s    p(95)=3.12s    p(99)=4.02s   
+     ✓ { endpoint:get_order }.......: avg=42.93ms  min=770.04µs med=2.52ms   max=1.85s   p(90)=25.37ms  p(95)=143.65ms p(99)=1.28s   
+     ✗ { endpoint:health }..........: avg=38.01ms  min=724.2µs  med=2.38ms   max=1.75s   p(90)=48.41ms  p(95)=219.8ms  p(99)=659.73ms
+       { expected_response:true }...: avg=1.21s    min=724.2µs  med=1.38s    max=4.78s   p(90)=1.98s    p(95)=2.61s    p(99)=3.88s   
+   ✓ http_req_failed................: 0.10%  ✓ 2         ✗ 1827
+     ✓ { endpoint:create_order }....: 0.15%  ✓ 2         ✗ 1297
+     ✓ { endpoint:get_order }.......: 0.00%  ✓ 0         ✗ 342 
+     ✓ { endpoint:health }..........: 0.00%  ✓ 0         ✗ 188 
+     http_req_receiving.............: avg=253.92µs min=15.25µs  med=103.75µs max=55.05ms p(90)=261.95µs p(95)=420.23µs p(99)=1.41ms  
+     http_req_sending...............: avg=199.39µs min=11µs     med=47.66µs  max=64.93ms p(90)=121.99µs p(95)=211.57µs p(99)=2.03ms  
+     http_req_tls_handshaking.......: avg=0s       min=0s       med=0s       max=0s      p(90)=0s       p(95)=0s       p(99)=0s      
+     http_req_waiting...............: avg=1.21s    min=675.04µs med=1.38s    max=4.78s   p(90)=1.98s    p(95)=2.6s     p(99)=3.87s   
+     http_reqs......................: 1829   25.632946/s
+     iteration_duration.............: avg=1.22s    min=885.75µs med=1.38s    max=4.79s   p(90)=1.99s    p(95)=2.6s     p(99)=3.88s   
+     iterations.....................: 1829   25.632946/s
+     responses_by_status............: 1829   25.632946/s
+     ✓ { status:0 }.................: 0      0/s
+     ✓ { status:200 }...............: 530    7.427808/s
+     ✓ { status:201 }...............: 1297   18.177108/s
+     ✓ { status:500 }...............: 0      0/s
+     ✓ { status:503 }...............: 2      0.028029/s
+     vus............................: 2      min=2       max=91
+     vus_max........................: 96     min=50      max=96

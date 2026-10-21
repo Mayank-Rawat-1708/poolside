@@ -1,0 +1,40 @@
+ Container poolside-k6-run-2b6ab21e2b95 Creating 
+ Container poolside-k6-run-2b6ab21e2b95 Created 
+     ✗ create 201
+      ↳  35% — ✓ 469 / ✗ 847
+     ✗ get 200
+      ↳  31% — ✓ 112 / ✗ 249
+     ✗ health 200
+      ↳  26% — ✓ 59 / ✗ 161
+
+     checks.........................: 33.73% ✓ 640       ✗ 1257
+     data_received..................: 683 kB 9.4 kB/s
+     data_sent......................: 272 kB 3.8 kB/s
+     dropped_iterations.............: 3      0.041441/s
+     http_req_blocked...............: avg=32.21µs  min=1.95µs   med=8.41µs   max=2.03ms  p(90)=26.9µs   p(95)=48.95µs  p(99)=826.57µs
+     http_req_connecting............: avg=14.45µs  min=0s       med=0s       max=1.34ms  p(90)=0s       p(95)=0s       p(99)=582.15µs
+     http_req_duration..............: avg=1.32s    min=58.64ms  med=1s       max=3.08s   p(90)=2.46s    p(95)=2.69s    p(99)=2.9s    
+     ✗ { endpoint:create_order }....: avg=1.48s    min=1s       med=1s       max=3.08s   p(90)=2.6s     p(95)=2.76s    p(99)=2.93s   
+     ✗ { endpoint:get_order }.......: avg=968.3ms  min=58.64ms  med=1s       max=1.09s   p(90)=1s       p(95)=1.01s    p(99)=1.02s   
+     ✗ { endpoint:health }..........: avg=963.85ms min=143.62ms med=1s       max=1.03s   p(90)=1s       p(95)=1s       p(99)=1.02s   
+       { expected_response:true }...: avg=1.95s    min=58.64ms  med=2.19s    max=3.08s   p(90)=2.76s    p(95)=2.85s    p(99)=2.96s   
+   ✗ http_req_failed................: 66.26% ✓ 1257      ✗ 640 
+     ✗ { endpoint:create_order }....: 64.36% ✓ 847       ✗ 469 
+     ✗ { endpoint:get_order }.......: 68.97% ✓ 249       ✗ 112 
+     ✗ { endpoint:health }..........: 73.18% ✓ 161       ✗ 59  
+     http_req_receiving.............: avg=170.87µs min=17.91µs  med=113.04µs max=37.44ms p(90)=231.07µs p(95)=328.76µs p(99)=830.1µs 
+     http_req_sending...............: avg=63.06µs  min=6.91µs   med=44.45µs  max=2.66ms  p(90)=99.11µs  p(95)=131.1µs  p(99)=401.47µs
+     http_req_tls_handshaking.......: avg=0s       min=0s       med=0s       max=0s      p(90)=0s       p(95)=0s       p(99)=0s      
+     http_req_waiting...............: avg=1.32s    min=58.51ms  med=1s       max=3.08s   p(90)=2.46s    p(95)=2.69s    p(99)=2.9s    
+     http_reqs......................: 1897   26.204211/s
+     iteration_duration.............: avg=1.32s    min=59.19ms  med=1s       max=3.08s   p(90)=2.46s    p(95)=2.69s    p(99)=2.91s   
+     iterations.....................: 1897   26.204211/s
+     responses_by_status............: 1897   26.204211/s
+     ✓ { status:0 }.................: 0      0/s
+     ✓ { status:200 }...............: 171    2.362109/s
+     ✓ { status:201 }...............: 469    6.478532/s
+     ✓ { status:500 }...............: 0      0/s
+     ✓ { status:503 }...............: 1257   17.36357/s
+     vus............................: 3      min=3       max=50
+     vus_max........................: 53     min=50      max=53time="2026-10-21T09:07:36Z" level=error msg="thresholds on metrics 'http_req_duration{endpoint:create_order}, http_req_duration{endpoint:get_order}, http_req_duration{endpoint:health}, http_req_failed, http_req_failed{endpoint:create_order}, http_req_failed{endpoint:get_order}, http_req_failed{endpoint:health}' have been crossed"
+

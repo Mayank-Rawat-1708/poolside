@@ -1,0 +1,12 @@
+# hold: POST /orders, trace ecdc411b164b68555fdb9b4af9183b61 (p90 of 145 successful orders in the spike window)
+start_ms  dur_ms  span
+     0.0  2777.7  POST /orders
+     1.0   995.4  db.pool.acquire
+     1.0   995.4  pg-pool.connect
+   997.0  1781.0  db.connection.held
+   997.0     1.1  pg.query:INSERT poolside
+   997.0     0.7  pg.query:BEGIN poolside
+   999.0  1775.5  downstream.charge
+   999.0  1774.1  POST
+  2774.0     2.0  pg.query:UPDATE poolside
+  2776.0     1.2  pg.query:COMMIT poolside

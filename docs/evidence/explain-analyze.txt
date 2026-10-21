@@ -1,0 +1,46 @@
+== row count
+ orders 
+--------
+   5022
+(1 row)
+
+== GET /orders/:id (find_order)
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Index Scan using orders_pkey on orders  (cost=0.28..8.30 rows=1 width=89) (actual time=0.694..0.695 rows=1 loops=1)
+   Index Cond: (id = 'fe5f93ca-8b78-4e48-98b5-db5b90b8f8a9'::uuid)
+   Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=54
+ Planning Time: 0.446 ms
+ Execution Time: 1.000 ms
+(7 rows)
+
+== POST /orders insert (insert_order), rolled back
+BEGIN
+                                           QUERY PLAN                                           
+------------------------------------------------------------------------------------------------
+ Insert on orders  (cost=0.00..0.02 rows=1 width=132) (actual time=0.585..0.586 rows=1 loops=1)
+   Buffers: shared hit=13 dirtied=2
+   ->  Result  (cost=0.00..0.02 rows=1 width=132) (actual time=0.019..0.020 rows=1 loops=1)
+ Planning:
+   Buffers: shared hit=6
+ Planning Time: 0.080 ms
+ Execution Time: 0.610 ms
+(7 rows)
+
+== POST /orders update (mark_order), rolled back
+                                                        QUERY PLAN                                                         
+---------------------------------------------------------------------------------------------------------------------------
+ Update on orders  (cost=0.28..8.30 rows=1 width=78) (actual time=0.050..0.051 rows=1 loops=1)
+   Buffers: shared hit=5
+   ->  Index Scan using orders_pkey on orders  (cost=0.28..8.30 rows=1 width=78) (actual time=0.013..0.013 rows=1 loops=1)
+         Index Cond: (id = 'fe5f93ca-8b78-4e48-98b5-db5b90b8f8a9'::uuid)
+         Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.050 ms
+ Execution Time: 0.167 ms
+(9 rows)
+
+ROLLBACK

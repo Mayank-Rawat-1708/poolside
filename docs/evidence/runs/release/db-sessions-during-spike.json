@@ -1,0 +1,1 @@
+{"sampledAt":"2026-10-21T09:10:32.849Z","sessions":[{"state":"idle","count":5,"longestInStateSec":1.667856,"oldestXactSec":0},{"state":"active","count":2,"longestInStateSec":-0.009214,"oldestXactSec":-0.008755}]}

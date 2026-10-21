@@ -1,0 +1,35 @@
+ Container poolside-k6-run-e4f6df521722 Creating 
+ Container poolside-k6-run-e4f6df521722 Created 
+     ✓ create 201
+     ✓ get 200
+     ✓ health 200
+
+     checks.........................: 100.00% ✓ 151      ✗ 0   
+     data_received..................: 67 kB   2.2 kB/s
+     data_sent......................: 22 kB   741 B/s
+     http_req_blocked...............: avg=103.5µs  min=5.08µs  med=21.95µs  max=1.07ms   p(90)=432.62µs p(95)=634.83µs p(99)=956.12µs
+     http_req_connecting............: avg=55.12µs  min=0s      med=0s       max=933.66µs p(90)=267.41µs p(95)=405.52µs p(99)=668.64µs
+     http_req_duration..............: avg=53.5ms   min=2.13ms  med=59.99ms  max=113.19ms p(90)=87.22ms  p(95)=90.82ms  p(99)=109.43ms
+     ✓ { endpoint:create_order }....: avg=68.98ms  min=42.25ms med=67.05ms  max=113.19ms p(90)=88.46ms  p(95)=96.96ms  p(99)=110.33ms
+     ✓ { endpoint:get_order }.......: avg=5.98ms   min=2.13ms  med=5.07ms   max=13.42ms  p(90)=11.7ms   p(95)=12.94ms  p(99)=13.33ms 
+     ✓ { endpoint:health }..........: avg=5.6ms    min=2.4ms   med=4.34ms   max=17.23ms  p(90)=9.74ms   p(95)=14.01ms  p(99)=16.59ms 
+       { expected_response:true }...: avg=53.5ms   min=2.13ms  med=59.99ms  max=113.19ms p(90)=87.22ms  p(95)=90.82ms  p(99)=109.43ms
+   ✓ http_req_failed................: 0.00%   ✓ 0        ✗ 151 
+     ✓ { endpoint:create_order }....: 0.00%   ✓ 0        ✗ 114 
+     ✓ { endpoint:get_order }.......: 0.00%   ✓ 0        ✗ 22  
+     ✓ { endpoint:health }..........: 0.00%   ✓ 0        ✗ 15  
+     http_req_receiving.............: avg=183.26µs min=49.2µs  med=148.12µs max=986.79µs p(90)=290.2µs  p(95)=413.47µs p(99)=813.22µs
+     http_req_sending...............: avg=120.71µs min=29.45µs med=99.37µs  max=931.7µs  p(90)=188.16µs p(95)=224.81µs p(99)=648.83µs
+     http_req_tls_handshaking.......: avg=0s       min=0s      med=0s       max=0s       p(90)=0s       p(95)=0s       p(99)=0s      
+     http_req_waiting...............: avg=53.2ms   min=2.03ms  med=59.67ms  max=112.88ms p(90)=86.8ms   p(95)=90.06ms  p(99)=108.88ms
+     http_reqs......................: 151     5.019626/s
+     iteration_duration.............: avg=54.62ms  min=2.61ms  med=62.68ms  max=116.2ms  p(90)=88.34ms  p(95)=92.26ms  p(99)=111.88ms
+     iterations.....................: 151     5.019626/s
+     responses_by_status............: 151     5.019626/s
+     ✓ { status:0 }.................: 0       0/s
+     ✓ { status:200 }...............: 37      1.229974/s
+     ✓ { status:201 }...............: 114     3.789651/s
+     ✓ { status:500 }...............: 0       0/s
+     ✓ { status:503 }...............: 0       0/s
+     vus............................: 0       min=0      max=0 
+     vus_max........................: 20      min=20     max=20
