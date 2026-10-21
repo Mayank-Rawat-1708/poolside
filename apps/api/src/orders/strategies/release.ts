@@ -1,7 +1,8 @@
 // TX_STRATEGY=release: never hold a pool connection across network I/O.
 //
 //   1. INSERT the order as 'pending' (autocommit), release the connection
-//   2. charge the provider with no connection held
+//   2. charge the provider with no connection held (per-attempt timeout,
+//      at most 2 jittered retries; safe thanks to the idempotency key)
 //   3. UPDATE to 'paid' / 'failed' on a fresh, short checkout
 //
 // Each checkout lasts milliseconds, so pool demand no longer scales with
@@ -16,7 +17,7 @@ export const createOrderRelease: CreateOrder = async ({ db, payments }, { custom
 
   let paymentRef: string;
   try {
-    ({ paymentRef } = await payments.charge(pending.id, amountCents));
+    ({ paymentRef } = await payments.chargeWithRetry(pending.id, amountCents));
   } catch (err) {
     await db.withClient((c) => markOrder(c, pending.id, 'failed', null));
     throw err;

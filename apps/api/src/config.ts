@@ -23,6 +23,13 @@ export const config = {
     acquireTimeoutMs: num('DB_ACQUIRE_TIMEOUT_MS', 1000),
   },
   downstreamUrl: process.env.DOWNSTREAM_URL ?? 'http://localhost:4001',
+  // Only applies to TX_STRATEGY=release; hold keeps its original single unbounded call.
+  chargePolicy: {
+    timeoutMs: num('DOWNSTREAM_TIMEOUT_MS', 3000),
+    retries: num('DOWNSTREAM_RETRIES', 2),
+    baseDelayMs: num('DOWNSTREAM_RETRY_BASE_MS', 100),
+    maxDelayMs: num('DOWNSTREAM_RETRY_MAX_MS', 1000),
+  },
   adminToken: process.env.ADMIN_TOKEN ?? '',
 };
 

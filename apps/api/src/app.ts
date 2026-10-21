@@ -21,7 +21,7 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
   const app = Fastify(loggingOptions(config.logLevel));
   const db = new InstrumentedPool(pool);
   registerHttpHooks(app, { poolStats: () => db.stats() });
-  const payments = new PaymentsClient(config.downstreamUrl);
+  const payments = new PaymentsClient(config.downstreamUrl, config.chargePolicy);
   if (!isStrategyName(config.txStrategy)) throw new Error(`unknown TX_STRATEGY "${config.txStrategy}"`);
   const strategy = new StrategySwitch(config.txStrategy);
 
@@ -34,7 +34,7 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
     if (err instanceof AppError) {
       req.log.warn({ err }, 'request failed');
       if (err.statusCode === 503) reply.header('retry-after', '1');
-      return reply.code(err.statusCode).send({ error: 'service_unavailable', code: err.code });
+      return reply.code(err.statusCode).send({ error: err.publicError, code: err.code });
     }
     req.log.error({ err }, 'request failed');
     // Never leak internals to clients.

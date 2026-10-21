@@ -83,10 +83,17 @@ export const downstreamDuration = new Histogram({
   registers: [registry],
 });
 
-// outcome: success | http_error | network_error
+// outcome: success | http_error | network_error | timeout
 export const downstreamRequests = new Counter({
   name: 'downstream_requests_total',
   help: 'Calls to the payments provider, per attempt, by outcome',
   labelNames: ['outcome'] as const,
+  registers: [registry],
+});
+
+export const downstreamRetries = new Counter({
+  name: 'downstream_retries_total',
+  help: 'Retries of calls to the payments provider, by reason of the failed attempt',
+  labelNames: ['reason'] as const,
   registers: [registry],
 });
