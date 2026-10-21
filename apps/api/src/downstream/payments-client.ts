@@ -4,6 +4,7 @@ import { DownstreamError } from '../errors.js';
 import { downstreamDuration, downstreamRequests, downstreamRetries } from '../obs/metrics.js';
 import { addTiming, currentContext } from '../obs/request-context.js';
 import { inSpan } from '../obs/spans.js';
+import { checkNetworkIo } from '../obs/tx-guard.js';
 import { retry } from './retry.js';
 
 export interface ChargeResult {
@@ -49,6 +50,7 @@ export class PaymentsClient {
   }
 
   private async attempt(orderId: string, amountCents: number, timeoutMs?: number): Promise<ChargeResult> {
+    checkNetworkIo('payments.charge');
     const controller = new AbortController();
     const timer = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : undefined;
     const start = performance.now();

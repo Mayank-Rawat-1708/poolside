@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 3 * * *' # nightly load test
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -63,3 +66,25 @@ jobs:
       - uses: actions/checkout@v4
       - run: cp .env.example .env
       - run: docker compose build
+
+  # Nightly / manual: the whole stack under a slow payments provider.
+  # k6 thresholds (error rate, per-endpoint p95) fail the job, which catches
+  # regressions such as network I/O moving back inside a transaction.
+  load-test:
+    name: load test (slow provider)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      TX_STRATEGY: release
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose up --build -d --wait api downstream
+      - run: docker compose run --rm k6 run /load/slow-downstream.js
+      - if: always()
+        run: docker compose logs api --tail 200
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-summary
+          path: docs/evidence/tmp/

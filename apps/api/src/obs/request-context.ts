@@ -12,12 +12,13 @@ export interface RequestContext {
   requestId: string;
   traceId: string | undefined;
   timings: Timings;
+  openTransactions: number; // BEGIN without COMMIT/ROLLBACK yet, see tx-guard.ts
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
 
 export function newContext(requestId: string, traceId: string | undefined): RequestContext {
-  return { requestId, traceId, timings: { acquireMs: 0, queryMs: 0, downstreamMs: 0 } };
+  return { requestId, traceId, timings: { acquireMs: 0, queryMs: 0, downstreamMs: 0 }, openTransactions: 0 };
 }
 
 export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {

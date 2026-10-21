@@ -9,7 +9,7 @@ import type pg from 'pg';
 import { performance } from 'node:perf_hooks';
 import type { Span } from '@opentelemetry/api';
 import { PoolAcquireTimeoutError } from '../errors.js';
-import { addTiming } from '../obs/request-context.js';
+import { addTiming, currentContext } from '../obs/request-context.js';
 import { inSpan, tracer } from '../obs/spans.js';
 import {
   dbClientErrors,
@@ -117,10 +117,23 @@ export async function timedQuery<R extends pg.QueryResultRow = pg.QueryResultRow
 ): Promise<pg.QueryResult<R>> {
   const start = performance.now();
   try {
-    return await db.query<R>(text, values);
+    const result = await db.query<R>(text, values);
+    trackTransaction(name);
+    return result;
+  } catch (err) {
+    if (name === 'rollback') trackTransaction(name);
+    throw err;
   } finally {
     const ms = performance.now() - start;
     dbQueryDuration.labels(name).observe(ms / 1000);
     addTiming('queryMs', ms);
   }
+}
+
+// Open-transaction count for the request, used by obs/tx-guard.ts.
+function trackTransaction(name: string) {
+  const ctx = currentContext();
+  if (!ctx) return;
+  if (name === 'begin') ctx.openTransactions++;
+  else if (name === 'commit' || name === 'rollback') ctx.openTransactions = Math.max(0, ctx.openTransactions - 1);
 }
