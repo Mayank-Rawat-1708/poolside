@@ -59,9 +59,10 @@ fresh connections (connection setup and cold caches), and it doesn't recur under
 | **Observed** | At the peak: **0.24 cores** of CPU, **event-loop lag p99 16.7 ms**, **heap 41 MiB** (`runs/hold/prometheus-during-spike.txt`). `docker stats`: API 28% of one core, Postgres 20%, with 8 cores available (`runs/hold/docker-stats-during-spike.txt`). |
 | **Verdict** | **Refuted.** The process is mostly idle. Requests are *waiting*, not computing. |
 
-One trap here: in an earlier run, event-loop lag spiked to ~250 ms. Lining it up with
-`db_pool_waiting` showed the spike arrived **~40 s after** the queue had built up, when
-~50 queued requests timed out in the same tick and were serialized as errors together. It
+One trap here: event-loop lag does spike briefly during the incident (row 4 of
+`evidence/screenshots/hold-spike-grafana-*.png`). Lining it up with `db_pool_waiting`
+showed the spike arrives **after** the queue has built up, when dozens of queued requests
+time out in the same tick and are serialized as errors together. It
 was an effect of the incident, not its cause. Order of events matters.
 
 ## Hypothesis 3: The payments provider is failing
@@ -139,4 +140,4 @@ routes.
   waiting for a free connection ("timeout exceeded when trying to connect") and opening a
   new one ("Connection terminated due to connection timeout"). Only the first was mapped to
   the typed 503 at first. On a cold CI runner, 4 of 902 requests hit the second case and
-  surfaced as untyped 500s. Both are now classified (`isPoolTimeout`, with a unit test).
+  surfaced as untyped 500s (`evidence/ci/github-actions-excerpts.md`). Both are now classified (`isPoolTimeout`, with a unit test).

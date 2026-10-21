@@ -34,12 +34,14 @@ Two design choices matter:
 
 ## Logs (pino, JSON, one line per request)
 
+A real line captured during an incident (`docs/evidence/log-line-during-incident.json`):
+
 ```json
-{"level":30,"time":"…","service":"api","requestId":"7f3c…","traceId":"8b61…",
- "method":"POST","route":"/orders","status":503,"durationMs":1006.8,
+{"level":50,"time":"2026-10-21T09:18:14.101Z","service":"api","requestId":"00168bf8-45c9-4bcb-8b4f-29d0a424074c",
+ "traceId":"0a44de2e9dee695740e045aed7ac5615","method":"POST","route":"/orders","status":503,"durationMs":1003.4,
  "errorClass":"PoolAcquireTimeoutError",
- "timings":{"acquireMs":1003.1,"queryMs":0,"downstreamMs":0},
- "pool":{"total":10,"idle":0,"waiting":27,"max":10},"msg":"request completed"}
+ "timings":{"acquireMs":1002.1,"queryMs":0,"downstreamMs":0},
+ "pool":{"total":10,"idle":0,"waiting":25,"max":10},"msg":"request completed"}
 ```
 
 | Field | Why |

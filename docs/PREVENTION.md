@@ -166,10 +166,10 @@ plus dependency latency. Two layers:
 - **Every PR:** the integration test (`apps/api/test/strategies.integration.test.ts`)
   runs both strategies against real Postgres with a 300 ms fake provider. It asserts that
   in `hold` the pool fills and callers wait for a large fraction of the provider latency
-  (locally ~800 ms), while in `release` no caller waits more than a third of it (locally
-  ≤ 6 ms). The test compares waits with provider latency instead of requiring zero
+  (locally 788–859 ms), while in `release` no caller waits more than a third of it (locally
+  ≤ 1.8 ms; `docs/evidence/ci/integration-test-local.md`). The test compares waits with provider latency instead of requiring zero
   queueing, because a slow CI runner shows momentary blips of a few callers waiting a few
-  milliseconds even in `release`. The first CI run failed on exactly that (6 waiting).
+  milliseconds even in `release`. The first CI run failed on exactly that (6 waiting; `docs/evidence/ci/github-actions-excerpts.md`).
   Cheap (~2 s).
 - **Nightly / on demand:** the `load-test` job in `.github/workflows/ci.yml` brings up the
   stack with compose and runs `load/slow-downstream.js` (provider at 1.2 s ± 0.4 s,

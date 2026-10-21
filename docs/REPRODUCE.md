@@ -39,7 +39,8 @@ make fix && make load-spike     # switch POST /orders to TX_STRATEGY=release, sa
 
 It also reproduces with a fast provider and enough concurrency: in the console, keep
 `hold`, set latency to Normal, and start the load generator with 20 workers. The pool
-reaches 10/10 with callers waiting. Hold time is short, but at ~150 req/s it adds up.
+reaches 10/10 with callers waiting. Each hold is short, but at high enough request rates
+(Little's law) it still exceeds 10 connections.
 
 Full scenario matrix with real numbers: `make evidence` (~13 min) writes
 `docs/evidence/runs/` and `docs/evidence/before-after.md`.
