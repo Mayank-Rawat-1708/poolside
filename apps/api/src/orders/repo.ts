@@ -1,4 +1,4 @@
-import type pg from 'pg';
+import { timedQuery, type Queryable } from '../db/instrumented-pool.js';
 
 export interface Order {
   id: string;
@@ -13,16 +13,14 @@ export interface Order {
 const COLUMNS = `id, customer_id AS "customerId", amount_cents AS "amountCents", status,
   payment_ref AS "paymentRef", created_at AS "createdAt", updated_at AS "updatedAt"`;
 
-// Accepts a Pool or a checked-out PoolClient so the same SQL works
-// inside or outside a transaction.
-type Queryable = Pick<pg.Pool, 'query'> | Pick<pg.PoolClient, 'query'>;
-
 export async function insertPendingOrder(
   db: Queryable,
   customerId: string,
   amountCents: number,
 ): Promise<Order> {
-  const { rows } = await db.query<Order>(
+  const { rows } = await timedQuery<Order>(
+    db,
+    'insert_order',
     `INSERT INTO orders (customer_id, amount_cents) VALUES ($1, $2) RETURNING ${COLUMNS}`,
     [customerId, amountCents],
   );
@@ -36,7 +34,9 @@ export async function markOrder(
   status: 'paid' | 'failed',
   paymentRef: string | null,
 ): Promise<Order> {
-  const { rows } = await db.query<Order>(
+  const { rows } = await timedQuery<Order>(
+    db,
+    'mark_order',
     `UPDATE orders SET status = $2, payment_ref = $3, updated_at = clock_timestamp()
      WHERE id = $1 RETURNING ${COLUMNS}`,
     [id, status, paymentRef],
@@ -45,6 +45,11 @@ export async function markOrder(
 }
 
 export async function findOrder(db: Queryable, id: string): Promise<Order | null> {
-  const { rows } = await db.query<Order>(`SELECT ${COLUMNS} FROM orders WHERE id = $1`, [id]);
+  const { rows } = await timedQuery<Order>(
+    db,
+    'find_order',
+    `SELECT ${COLUMNS} FROM orders WHERE id = $1`,
+    [id],
+  );
   return rows[0] ?? null;
 }

@@ -2,11 +2,22 @@
 // without threading it through every function signature.
 import { AsyncLocalStorage } from 'node:async_hooks';
 
+export interface Timings {
+  acquireMs: number; // waiting for a pool connection
+  queryMs: number; // executing SQL
+  downstreamMs: number; // waiting on the payments provider
+}
+
 export interface RequestContext {
   requestId: string;
+  timings: Timings;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
+
+export function newContext(requestId: string): RequestContext {
+  return { requestId, timings: { acquireMs: 0, queryMs: 0, downstreamMs: 0 } };
+}
 
 export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {
   return storage.run(ctx, fn);
@@ -14,4 +25,10 @@ export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {
 
 export function currentContext(): RequestContext | undefined {
   return storage.getStore();
+}
+
+// No-op outside a request (e.g. background work, tests).
+export function addTiming(kind: keyof Timings, ms: number): void {
+  const ctx = storage.getStore();
+  if (ctx) ctx.timings[kind] += ms;
 }

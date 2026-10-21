@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
-import type pg from 'pg';
+import { timedQuery, type InstrumentedPool } from '../db/instrumented-pool.js';
 
-export async function healthRoutes(app: FastifyInstance, { pool }: { pool: pg.Pool }) {
+export async function healthRoutes(app: FastifyInstance, { db }: { db: InstrumentedPool }) {
   app.get('/health', async () => {
-    await pool.query('SELECT 1');
+    await db.withClient((c) => timedQuery(c, 'health_ping', 'SELECT 1'));
     return { status: 'ok' };
   });
 }

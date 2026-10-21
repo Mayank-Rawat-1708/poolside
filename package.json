@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "vitest run --project unit",
+    "test": "vitest run --project unit --passWithNoTests",
     "test:integration": "vitest run --project integration",
     "check": "npm run lint && npm run typecheck && npm test"
   },

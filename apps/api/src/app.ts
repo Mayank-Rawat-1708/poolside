@@ -1,6 +1,7 @@
 import Fastify, { type FastifyError } from 'fastify';
 import type pg from 'pg';
 import type { Config } from './config.js';
+import { InstrumentedPool } from './db/instrumented-pool.js';
 import { PaymentsClient } from './downstream/payments-client.js';
 import { healthRoutes } from './health/routes.js';
 import { orderRoutes } from './orders/routes.js';
@@ -14,7 +15,8 @@ export interface AppDeps {
 
 export function buildApp({ config, pool }: AppDeps) {
   const app = Fastify(loggingOptions(config.logLevel));
-  registerHttpHooks(app);
+  const db = new InstrumentedPool(pool);
+  registerHttpHooks(app, { poolStats: () => db.stats() });
   const payments = new PaymentsClient(config.downstreamUrl);
 
   app.setErrorHandler((err: FastifyError, req, reply) => {
@@ -32,7 +34,7 @@ export function buildApp({ config, pool }: AppDeps) {
     return registry.metrics();
   });
 
-  app.register(healthRoutes, { pool });
-  app.register(orderRoutes, { pool, payments });
+  app.register(healthRoutes, { db });
+  app.register(orderRoutes, { db, payments });
   return app;
 }

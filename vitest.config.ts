@@ -8,7 +8,6 @@ export default defineConfig({
           name: 'unit',
           include: ['apps/*/test/**/*.test.ts'],
           exclude: ['**/*.integration.test.ts', '**/node_modules/**'],
-          passWithNoTests: true,
         },
       },
       {

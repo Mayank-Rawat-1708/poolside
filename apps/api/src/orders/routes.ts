@@ -1,16 +1,16 @@
 import type { FastifyInstance } from 'fastify';
-import type pg from 'pg';
+import { timedQuery, type InstrumentedPool } from '../db/instrumented-pool.js';
 import type { PaymentsClient } from '../downstream/payments-client.js';
 import { findOrder, insertPendingOrder, markOrder } from './repo.js';
 
 interface Deps {
-  pool: pg.Pool;
+  db: InstrumentedPool;
   payments: PaymentsClient;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function orderRoutes(app: FastifyInstance, { pool, payments }: Deps) {
+export async function orderRoutes(app: FastifyInstance, { db, payments }: Deps) {
   app.post<{ Body: { customerId: string; amountCents: number } }>(
     '/orders',
     {
@@ -30,16 +30,16 @@ export async function orderRoutes(app: FastifyInstance, { pool, payments }: Deps
       const { customerId, amountCents } = req.body;
 
       // The order and its payment are written atomically.
-      const client = await pool.connect();
+      const client = await db.acquire();
       try {
-        await client.query('BEGIN');
+        await timedQuery(client, 'begin', 'BEGIN');
         const pending = await insertPendingOrder(client, customerId, amountCents);
         const { paymentRef } = await payments.charge(pending.id, amountCents);
         const order = await markOrder(client, pending.id, 'paid', paymentRef);
-        await client.query('COMMIT');
+        await timedQuery(client, 'commit', 'COMMIT');
         return reply.code(201).send(order);
       } catch (err) {
-        await client.query('ROLLBACK').catch(() => {});
+        await timedQuery(client, 'rollback', 'ROLLBACK').catch(() => {});
         throw err;
       } finally {
         client.release();
@@ -49,7 +49,7 @@ export async function orderRoutes(app: FastifyInstance, { pool, payments }: Deps
 
   app.get<{ Params: { id: string } }>('/orders/:id', async (req, reply) => {
     if (!UUID_RE.test(req.params.id)) return reply.code(404).send({ error: 'not_found' });
-    const order = await findOrder(pool, req.params.id);
+    const order = await db.withClient((c) => findOrder(c, req.params.id));
     if (!order) return reply.code(404).send({ error: 'not_found' });
     return order;
   });
