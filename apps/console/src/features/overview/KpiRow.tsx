@@ -6,7 +6,7 @@ import { current, type OverviewData } from './useOverview';
 const pts = (s: Series[] | undefined) => s?.[0]?.points ?? [];
 
 function level(value: number | null, warn: number, bad: number): Level {
-  if (value == null) return 'ok';
+  if (value == null) return 'neutral'; // no data is not "normal"
   if (value >= bad) return 'bad';
   if (value >= warn) return 'warn';
   return 'ok';

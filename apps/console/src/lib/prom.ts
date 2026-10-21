@@ -22,7 +22,7 @@ export async function queryRange(expr: string, seconds: number, step: number, si
   const end = Math.floor(Date.now() / 1000);
   const params = new URLSearchParams({ query: expr, start: String(end - seconds), end: String(end), step: String(step) });
   const res = await fetch(`/prom/api/v1/query_range?${params}`, { signal });
-  if (!res.ok) throw new Error(`Prometheus ${res.status}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const body = (await res.json()) as RangeResponse;
   if (body.status !== 'success') throw new Error(body.error ?? 'Prometheus query failed');
   return body.data.result.map((r) => ({
