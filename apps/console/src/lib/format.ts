@@ -20,6 +20,6 @@ export function formatRate(perSecond: number | null | undefined): string {
   return perSecond.toFixed(1);
 }
 
-export function formatClock(date: Date | number): string {
+export function formatClock(date: Date | number | string): string {
   return new Date(date).toLocaleTimeString([], { hour12: false });
 }
