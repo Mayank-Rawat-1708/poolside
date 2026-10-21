@@ -21,6 +21,7 @@ export const config = {
     database: process.env.PGDATABASE ?? 'poolside',
     poolMax: num('DB_POOL_MAX', 10),
     acquireTimeoutMs: num('DB_ACQUIRE_TIMEOUT_MS', 1000),
+    idleInTxTimeoutMs: num('DB_IDLE_IN_TX_TIMEOUT_MS', 10_000),
   },
   downstreamUrl: process.env.DOWNSTREAM_URL ?? 'http://localhost:4001',
   // Only applies to TX_STRATEGY=release; hold keeps its original single unbounded call.

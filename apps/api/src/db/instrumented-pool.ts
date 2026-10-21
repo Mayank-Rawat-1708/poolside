@@ -12,6 +12,7 @@ import { PoolAcquireTimeoutError } from '../errors.js';
 import { addTiming } from '../obs/request-context.js';
 import { inSpan, tracer } from '../obs/spans.js';
 import {
+  dbClientErrors,
   dbConnectionHold,
   dbPoolAcquireWait,
   dbQueryDuration,
@@ -31,6 +32,7 @@ export class InstrumentedPool {
   private readonly acquiredAt = new WeakMap<pg.PoolClient, number>();
   // Spans covering the whole checkout, so traces show what ran while a connection was held.
   private readonly heldSpans = new WeakMap<pg.PoolClient, Span>();
+  private readonly guarded = new WeakSet<pg.PoolClient>();
 
   constructor(readonly pool: pg.Pool) {
     registerPoolGauges(() => this.stats());
@@ -64,6 +66,7 @@ export class InstrumentedPool {
         () => this.pool.connect(),
       );
       this.heldSpans.set(client, tracer.startSpan('db.connection.held'));
+      this.guard(client);
       return client;
     } catch (err) {
       // pg reports a pool timeout as a plain Error with this message;
@@ -79,6 +82,19 @@ export class InstrumentedPool {
       dbPoolAcquireWait.labels(outcome).observe(ms / 1000);
       addTiming('acquireMs', ms);
     }
+  }
+
+  // pg only listens for errors on *idle* clients. If the server kills a
+  // checked-out connection (idle_in_transaction_session_timeout, failover,
+  // pg_terminate_backend) the client emits 'error' with no listener and
+  // Node exits. The pending query still rejects, so logging is enough here.
+  private guard(client: pg.PoolClient) {
+    if (this.guarded.has(client)) return;
+    this.guarded.add(client);
+    client.on('error', (err) => {
+      dbClientErrors.labels((err as { code?: string }).code ?? 'unknown').inc();
+      console.error(JSON.stringify({ level: 50, msg: 'checked-out pg client error', err: err.message }));
+    });
   }
 
   // Acquire, run fn, always release.

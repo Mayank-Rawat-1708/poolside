@@ -52,6 +52,14 @@ export const dbConnectionHold = new Histogram({
   registers: [registry],
 });
 
+// Connections killed under us (e.g. code 25P03 = idle_in_transaction_session_timeout).
+export const dbClientErrors = new Counter({
+  name: 'db_client_errors_total',
+  help: 'Errors emitted by checked-out pg clients, by SQLSTATE',
+  labelNames: ['code'] as const,
+  registers: [registry],
+});
+
 // Gauges are read at scrape time from the live pool.
 export function registerPoolGauges(read: () => { total: number; idle: number; waiting: number; max: number }) {
   const gauges = [
