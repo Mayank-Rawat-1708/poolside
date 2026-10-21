@@ -30,6 +30,8 @@ for s in hold release; do
   echo "== $s"
   strategy "$s"
   downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
+  # Warm up (JIT, pool connections) so the first scenario isn't penalised by a cold process.
+  for _ in $(seq 1 30); do curl -s -o /dev/null -XPOST localhost:3000/orders -H 'content-type: application/json' -d '{"customerId":"warmup","amountCents":100}'; done
   sleep 5
   echo "   baseline";        k6 "$s" baseline
   downstream '{"latencyMs":1500,"jitterMs":500,"errorRate":0}'

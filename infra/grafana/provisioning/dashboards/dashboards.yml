@@ -1,7 +1,7 @@
 apiVersion: 1
 providers:
   - name: poolside
-    folder: ""
+    folder: PoolSide
     type: file
     # Dashboards are owned by git; UI edits are not saved back.
     allowUiUpdates: false
