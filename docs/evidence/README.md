@@ -87,5 +87,10 @@ traces/<strategy>-post-orders.json, <strategy>-waterfall.txt
 ```
 
 Screenshots come from a second, unmeasured spike per strategy (same scenario), taken
-≈35 s in. The console's incident timeline is empty in them because the browser opened
-mid-incident.
+≈35 s in. Things to know when reading them:
+- The console's incident timeline is empty because the browser opened mid-incident.
+- Charts show the last 5 minutes, so the `release` screenshots still include the tail of
+  the preceding `hold` spike (the hump about two minutes before the right edge). The
+  current state is the right-hand edge plus the KPI cards: 0% errors, 0 waiting.
+- The console status reads **Failing** in `release` because p95 ≥ 2 s (the provider is
+  still slow). Errors and pool waiting are 0.

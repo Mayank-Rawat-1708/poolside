@@ -9,3 +9,6 @@ coverage/
 docs/evidence/tmp/
 test-results/
 playwright-report/
+
+# Personal interview prep, not part of the submission
+docs/INTERVIEW_NOTES.md
