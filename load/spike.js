@@ -1,6 +1,6 @@
 // Traffic burst: 10 rps -> 40 rps for 30s -> back down.
 // With a fast provider this is comfortable; with a slow one it is not.
-import { trafficMix, thresholds } from './lib/common.js';
+import { summaryTrendStats, thresholds, trafficMix } from './lib/common.js';
 import { summaryFor } from './lib/summary.js';
 
 export const options = {
@@ -21,6 +21,7 @@ export const options = {
     },
   },
   thresholds,
+  summaryTrendStats,
 };
 
 export default trafficMix;

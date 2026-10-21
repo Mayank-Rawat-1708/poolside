@@ -1,6 +1,6 @@
 // Moderate steady load while the payments provider is slow (~1.2s ± 0.4s).
 // The script configures the provider itself and restores it afterwards.
-import { DOWNSTREAM, setDownstream, trafficMix, thresholds } from './lib/common.js';
+import { DOWNSTREAM, setDownstream, summaryTrendStats, thresholds, trafficMix } from './lib/common.js';
 import { summaryFor } from './lib/summary.js';
 
 export const options = {
@@ -15,6 +15,7 @@ export const options = {
     },
   },
   thresholds,
+  summaryTrendStats,
 };
 
 export function setup() {

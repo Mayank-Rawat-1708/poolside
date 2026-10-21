@@ -53,6 +53,9 @@ export function setDownstream(behaviour) {
   if (res.status !== 200) throw new Error(`could not configure downstream: ${res.status}`);
 }
 
+// p(99) is not in k6's default summary; the evidence table needs it.
+export const summaryTrendStats = ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'];
+
 // Per-endpoint thresholds make k6 print per-endpoint latency and error rate.
 export const thresholds = {
   http_req_failed: ['rate<0.01'],

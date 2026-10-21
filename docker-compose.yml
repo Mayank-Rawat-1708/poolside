@@ -127,10 +127,11 @@ services:
       API_URL: http://api:3000
       DOWNSTREAM_URL: http://downstream:4001
       ADMIN_TOKEN: ${ADMIN_TOKEN:-local-dev-admin-token}
-      RESULTS_DIR: /results
+      RESULTS_DIR: ${RESULTS_DIR:-/results/tmp}
+      SUMMARY_NAME: ${SUMMARY_NAME:-}
     volumes:
       - ./load:/load:ro
-      - ./docs/evidence/tmp:/results
+      - ./docs/evidence:/results
 
 volumes:
   pgdata:

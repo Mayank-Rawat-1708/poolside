@@ -1,5 +1,5 @@
 // Light, steady load. Expected: everything healthy.
-import { trafficMix, thresholds } from './lib/common.js';
+import { summaryTrendStats, thresholds, trafficMix } from './lib/common.js';
 import { summaryFor } from './lib/summary.js';
 
 export const options = {
@@ -14,6 +14,7 @@ export const options = {
     },
   },
   thresholds,
+  summaryTrendStats,
 };
 
 export default trafficMix;

@@ -1,5 +1,5 @@
 // Writes the end-of-test summary to stdout and, when RESULTS_DIR is set,
-// to <RESULTS_DIR>/<name>.json and .txt so `make evidence` can keep it.
+// to <RESULTS_DIR>/<name>.json and .txt (default RESULTS_DIR: docs/evidence/tmp).
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.1.0/index.js';
 
 export function summaryFor(name) {

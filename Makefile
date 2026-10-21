@@ -15,7 +15,7 @@ AUTH        := -H "authorization: Bearer $(ADMIN_TOKEN)" -H "content-type: appli
 BREAK_LATENCY_MS ?= 1500
 BREAK_JITTER_MS  ?= 500
 
-.PHONY: help up down logs ps break fix hold strategy reset psql check test-integration pg-activity load-baseline load-spike load-slow
+.PHONY: help up down logs ps break fix hold strategy reset psql check test-integration pg-activity evidence screenshots load-baseline load-spike load-slow
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -53,9 +53,10 @@ hold: ## Switch POST /orders to TX_STRATEGY=hold (the original flow)
 strategy: ## Show the active TX strategy
 	@curl -sf $(API)/admin/strategy $(AUTH) && echo
 
-reset: ## Restore normal downstream behaviour
+reset: ## Back to the starting point: normal provider and TX_STRATEGY=hold
 	@curl -sf -XPUT $(DOWNSTREAM)/admin/latency $(AUTH) \
 	  -d '{"latencyMs":50,"jitterMs":20,"errorRate":0}' && echo
+	@curl -sf -XPUT $(API)/admin/strategy $(AUTH) -d '{"strategy":"hold"}' && echo
 
 pg-activity: ## Snapshot pg_stat_activity grouped by state
 	@scripts/pg-activity.sh
@@ -73,6 +74,12 @@ load-spike: ## k6: burst 10 -> 40 rps
 
 load-slow: ## k6: 15 rps while the provider is slow (sets latency itself)
 	$(K6) /load/slow-downstream.js
+
+evidence: ## Run all scenarios in hold and release, save outputs to docs/evidence (~8 min)
+	@scripts/evidence.sh
+
+screenshots: ## Screenshot console + Grafana in both themes
+	node scripts/screenshots.mjs docs/evidence/screenshots
 
 check: ## Lint, typecheck and unit tests
 	npm run check

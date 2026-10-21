@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Runs every scenario against both strategies and saves raw outputs under
+# docs/evidence/runs/<strategy>/. Takes ~8 minutes. Requires `make up`.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+TOKEN="${ADMIN_TOKEN:-local-dev-admin-token}"
+AUTH=(-H "authorization: Bearer $TOKEN" -H "content-type: application/json")
+OUT=docs/evidence/runs
+
+strategy() { curl -sf -XPUT localhost:3000/admin/strategy "${AUTH[@]}" -d "{\"strategy\":\"$1\"}" >/dev/null; }
+downstream() { curl -sf -XPUT localhost:4001/admin/latency "${AUTH[@]}" -d "$1" >/dev/null; }
+k6() { # k6 <strategy> <script> ; k6 exits non-zero when thresholds fail, which is expected for hold
+  docker compose run --rm -e RESULTS_DIR="/results/runs/$1" -e SUMMARY_NAME="$2" k6 run --quiet "/load/$2.js" \
+    > "$OUT/$1/$2.stdout.txt" 2>&1 || true
+}
+# Captures DB, metrics, container and visual state while the spike is at its peak.
+snapshot() {
+  local dir="$OUT/$1"
+  sleep 30
+  scripts/pg-activity.sh > "$dir/pg-activity-during-spike.txt" 2>&1 || true
+  curl -s localhost:3000/admin/db-sessions "${AUTH[@]}" > "$dir/db-sessions-during-spike.json" || true
+  node scripts/prom-snapshot.mjs > "$dir/prometheus-during-spike.txt" 2>&1 || true
+  docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' > "$dir/docker-stats-during-spike.txt" || true
+  node scripts/screenshots.mjs docs/evidence/screenshots "$1-spike-" > /dev/null 2>&1 || true
+}
+
+for s in hold release; do
+  mkdir -p "$OUT/$s"
+  echo "== $s"
+  strategy "$s"
+  downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
+  sleep 5
+  echo "   baseline";        k6 "$s" baseline
+  downstream '{"latencyMs":1500,"jitterMs":500,"errorRate":0}'
+  echo "   spike (slow provider)"
+  snapshot "$s" &
+  k6 "$s" spike
+  wait
+  downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
+  sleep 20 # let rate() windows drain between scenarios
+  echo "   slow-downstream"; k6 "$s" slow-downstream
+  sleep 20
+done
+
+strategy hold
+downstream '{"latencyMs":50,"jitterMs":20,"errorRate":0}'
+node scripts/before-after.mjs "$OUT" > docs/evidence/before-after.md
+cat docs/evidence/before-after.md
