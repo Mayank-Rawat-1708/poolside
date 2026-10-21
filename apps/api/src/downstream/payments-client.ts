@@ -22,6 +22,8 @@ export class PaymentsClient {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
+          // The provider dedupes on this, so a repeated charge for the same order is safe.
+          'idempotency-key': orderId,
           // Lets the provider's logs be joined with ours.
           'x-request-id': currentContext()?.requestId ?? '',
         },

@@ -15,7 +15,7 @@ AUTH        := -H "authorization: Bearer $(ADMIN_TOKEN)" -H "content-type: appli
 BREAK_LATENCY_MS ?= 1500
 BREAK_JITTER_MS  ?= 500
 
-.PHONY: help up down logs ps break hold strategy reset psql check pg-activity load-baseline load-spike load-slow
+.PHONY: help up down logs ps break fix hold strategy reset psql check pg-activity load-baseline load-spike load-slow
 
 help: ## Show targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -42,6 +42,9 @@ ps: ## Show container status
 break: ## Make the payments provider slow (1.5s ± 0.5s)
 	@curl -sf -XPUT $(DOWNSTREAM)/admin/latency $(AUTH) \
 	  -d '{"latencyMs":$(BREAK_LATENCY_MS),"jitterMs":$(BREAK_JITTER_MS)}' && echo
+
+fix: ## Switch POST /orders to TX_STRATEGY=release (no connection held across I/O)
+	@curl -sf -XPUT $(API)/admin/strategy $(AUTH) -d '{"strategy":"release"}' && echo
 
 hold: ## Switch POST /orders to TX_STRATEGY=hold (the original flow)
 	@curl -sf -XPUT $(API)/admin/strategy $(AUTH) -d '{"strategy":"hold"}' && echo

@@ -1,9 +1,10 @@
 import { Gauge } from 'prom-client';
 import { registry } from '../../obs/metrics.js';
 import { createOrderHold } from './hold.js';
+import { createOrderRelease } from './release.js';
 import type { CreateOrder } from './types.js';
 
-export const STRATEGIES = { hold: createOrderHold } satisfies Record<string, CreateOrder>;
+export const STRATEGIES = { hold: createOrderHold, release: createOrderRelease } satisfies Record<string, CreateOrder>;
 export type StrategyName = keyof typeof STRATEGIES;
 
 export function isStrategyName(value: unknown): value is StrategyName {
