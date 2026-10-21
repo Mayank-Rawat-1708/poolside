@@ -1,0 +1,24 @@
+// All runtime configuration in one place, read once at startup.
+function num(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) throw new Error(`${name} must be a number, got "${raw}"`);
+  return value;
+}
+
+export const config = {
+  port: num('PORT', 3000),
+  logLevel: process.env.LOG_LEVEL ?? 'info',
+  db: {
+    host: process.env.PGHOST ?? 'localhost',
+    port: num('PGPORT', 5432),
+    user: process.env.PGUSER ?? 'poolside',
+    password: process.env.PGPASSWORD ?? 'poolside',
+    database: process.env.PGDATABASE ?? 'poolside',
+    poolMax: num('DB_POOL_MAX', 10),
+  },
+  downstreamUrl: process.env.DOWNSTREAM_URL ?? 'http://localhost:4001',
+};
+
+export type Config = typeof config;
