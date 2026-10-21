@@ -34,10 +34,14 @@
 }
 
 @layer components {
+  /* Preflight's border-style doesn't reach these pseudo-elements, so set it here. */
   .slider::-webkit-slider-thumb {
-    @apply h-4 w-4 appearance-none rounded-full border-2 border-accent bg-surface;
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-solid border-accent bg-surface shadow-sm transition-transform;
   }
   .slider::-moz-range-thumb {
-    @apply h-4 w-4 rounded-full border-2 border-accent bg-surface;
+    @apply h-4 w-4 rounded-full border-2 border-solid border-accent bg-surface shadow-sm;
+  }
+  .slider:active::-webkit-slider-thumb {
+    @apply scale-110;
   }
 }
