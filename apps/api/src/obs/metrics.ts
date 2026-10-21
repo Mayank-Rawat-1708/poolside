@@ -19,6 +19,14 @@ export const httpRequestDuration = new Histogram({
 
 
 
+// Every failed request, by error class: a new failure mode shows up as a new label.
+export const appErrors = new Counter({
+  name: 'app_errors_total',
+  help: 'Requests that failed, by error class and route',
+  labelNames: ['class', 'route'] as const,
+  registers: [registry],
+});
+
 // --- Database ---------------------------------------------------------------
 
 export const dbPoolAcquireWait = new Histogram({

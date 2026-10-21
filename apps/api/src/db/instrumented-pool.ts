@@ -8,6 +8,7 @@
 import type pg from 'pg';
 import { performance } from 'node:perf_hooks';
 import type { Span } from '@opentelemetry/api';
+import { PoolAcquireTimeoutError } from '../errors.js';
 import { addTiming } from '../obs/request-context.js';
 import { inSpan, tracer } from '../obs/spans.js';
 import {
@@ -65,6 +66,12 @@ export class InstrumentedPool {
       this.heldSpans.set(client, tracer.startSpan('db.connection.held'));
       return client;
     } catch (err) {
+      // pg reports a pool timeout as a plain Error with this message;
+      // turn it into a typed error so it can't be mistaken for a DB outage.
+      if (err instanceof Error && err.message.includes('timeout exceeded when trying to connect')) {
+        outcome = 'timeout';
+        throw new PoolAcquireTimeoutError(performance.now() - start, this.stats(), { cause: err });
+      }
       outcome = 'error';
       throw err;
     } finally {

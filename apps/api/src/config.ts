@@ -20,6 +20,7 @@ export const config = {
     password: process.env.PGPASSWORD ?? 'poolside',
     database: process.env.PGDATABASE ?? 'poolside',
     poolMax: num('DB_POOL_MAX', 10),
+    acquireTimeoutMs: num('DB_ACQUIRE_TIMEOUT_MS', 1000),
   },
   downstreamUrl: process.env.DOWNSTREAM_URL ?? 'http://localhost:4001',
   adminToken: process.env.ADMIN_TOKEN ?? '',

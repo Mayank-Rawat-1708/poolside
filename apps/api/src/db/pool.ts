@@ -10,7 +10,8 @@ export function createPool(db: Config['db']): pg.Pool {
     database: db.database,
     max: db.poolMax,
     idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 5_000,
+    // Fail fast when the pool is exhausted instead of letting callers pile up.
+    connectionTimeoutMillis: db.acquireTimeoutMs,
     application_name: 'poolside-api',
   });
 }
