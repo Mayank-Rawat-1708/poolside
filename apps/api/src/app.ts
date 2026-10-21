@@ -36,7 +36,7 @@ export function buildApp({ config, pool, opsPool }: AppDeps) {
     return registry.metrics();
   });
 
-  app.register(healthRoutes, { db });
+  app.register(healthRoutes, { db, opsPool });
   app.register(orderRoutes, { db, payments });
   app.register(adminRoutes, { adminToken: config.adminToken, opsPool });
   return app;

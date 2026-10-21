@@ -50,6 +50,11 @@ services:
       OTEL_SERVICE_NAME: poolside-api
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports: ["3000:3000"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health/ready"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   downstream:
     build: { context: ., dockerfile: apps/downstream/Dockerfile }
