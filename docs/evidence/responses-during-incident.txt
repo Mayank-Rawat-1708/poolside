@@ -1,0 +1,38 @@
+$ curl -si -XPOST localhost:3000/orders -H "content-type: application/json" -d '{"customerId":"c1","amountCents":1299}'
+HTTP/1.1 503 Service Unavailable
+x-request-id: 670a4213-ee40-4c6f-bc9c-781bdad91285
+retry-after: 1
+content-type: application/json; charset=utf-8
+content-length: 61
+
+{"error":"service_unavailable","code":"POOL_ACQUIRE_TIMEOUT"}
+
+
+$ curl -si localhost:3000/orders/<id>
+HTTP/1.1 503 Service Unavailable
+x-request-id: 1a352a58-03ba-4cdd-8a19-cdf582d06245
+retry-after: 1
+content-type: application/json; charset=utf-8
+content-length: 61
+
+{"error":"service_unavailable","code":"POOL_ACQUIRE_TIMEOUT"}
+
+
+$ curl -si localhost:3000/health
+HTTP/1.1 503 Service Unavailable
+x-request-id: 3141b962-3b0c-4764-b853-0ffed68b65c4
+retry-after: 1
+content-type: application/json; charset=utf-8
+content-length: 61
+
+{"error":"service_unavailable","code":"POOL_ACQUIRE_TIMEOUT"}
+
+
+$ curl -si localhost:3000/health/ready
+HTTP/1.1 200 OK
+x-request-id: 3bc0de97-212a-45d0-90b2-e7d0e3045f46
+content-type: application/json; charset=utf-8
+content-length: 66
+
+{"status":"ok","pool":{"total":10,"idle":0,"waiting":39,"max":10}}
+
